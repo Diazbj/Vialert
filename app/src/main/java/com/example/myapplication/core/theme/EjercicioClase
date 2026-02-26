@@ -1,0 +1,123 @@
+package com.example.myapplication
+
+import android.R.attr.text
+import android.graphics.drawable.Icon
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.sharp.Favorite
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.myapplication.ui.theme.MyApplicationTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MyApplicationTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Greeting(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+        modifier= Modifier
+            .fillMaxSize()
+            //.background(color= Color.Red)
+    )
+    {
+
+
+        Image(
+            painter= painterResource(id=R.drawable.frisby),
+            contentDescription= "Descripcion de la imagen"
+        )
+        Text(
+            text = "Hello, Jetpack Compose!",
+            fontSize = 24.sp,
+            color = Color.Blue,
+            fontWeight = FontWeight.Bold,
+            modifier = modifier
+        )
+
+        OutlinedButton(
+
+            modifier=modifier,
+            onClick={
+
+            },
+            content = {
+
+                Icon(
+                    imageVector = Icons.Outlined.Favorite,
+                    contentDescription = "Icono de favorito"
+                )
+                Text(
+                    text = "Login"
+                )
+
+
+            }
+
+        )
+
+        OutlinedTextField(
+            value = " ",
+            onValueChange = {
+            },
+            label = {
+                Text("Ingrese su nombre")
+            }
+        )
+
+
+    }
+
+
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    MyApplicationTheme {
+        Greeting("Android")
+    }
+}
