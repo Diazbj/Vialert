@@ -10,18 +10,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 
@@ -46,20 +51,23 @@ fun ForgetPassword(
 
         Text(
             text = "Recuperar Contraseña",
+            fontSize = 26.sp,
+            color = Color.DarkGray
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = viewModel.email.value, // Estado del campo de email desde el ViewModel
-            onValueChange = { viewModel.email.onChange(it) }, // Actualiza el estado en el ViewModel
-            label = {
-                Text(text = "Correo Electrónico")
+            value = viewModel.email.value,
+            onValueChange = { viewModel.email.onChange(it) },
+            label = { Text("Correo electrónico") },
+            leadingIcon = {
+                Icon(Icons.Default.Email, contentDescription = null)
             },
-            isError = viewModel.email.error != null, // Se muestra el borde rojo si hay error
+            isError = viewModel.email.error != null,
             supportingText = viewModel.email.error?.let { error ->
-                { Text(text = error) }
+                { Text(error) }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Button(

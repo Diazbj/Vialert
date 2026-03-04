@@ -20,12 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 
@@ -50,12 +52,14 @@ fun ResetPassword(
 
         Text(
             text = "Actualice su contraseña",
+            fontSize = 26.sp,
+            color = Color.DarkGray
         )
 
         OutlinedTextField(
             value = viewModel.password1.value,
             onValueChange = { viewModel.password1.onChange(it) },
-            label = { Text("Contraseña") },
+            label = { Text("Ingrese su nueva contraseña") },
             leadingIcon = {
                 Icon(Icons.Default.Lock, contentDescription = null)
             },
@@ -88,7 +92,7 @@ fun ResetPassword(
             onClick = {
                 Toast.makeText(context, "Contraseña Actualizada", Toast.LENGTH_SHORT).show()
             },
-            //enabled = viewModel.isFormValid,
+            enabled = viewModel.isFormValid,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Actualizar contraseña")

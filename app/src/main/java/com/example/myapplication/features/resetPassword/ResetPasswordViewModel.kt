@@ -18,9 +18,11 @@ class ResetPasswordViewModel: ViewModel() {
         when {
             value.isEmpty() -> "La contraseña es obligatoria"
             value.length < 6 -> "Debe tener mínimo 6 caracteres"
-            !Patterns.EMAIL_ADDRESS.matcher(value).matches() -> "Ingresa un email válido"
+            !(value == password1.value) -> "Las contraseñas deben de ser iguales"
             else -> null
         }
     }
+
+    val isFormValid: Boolean get() = password1.isValid && password2.isValid
 
 }
