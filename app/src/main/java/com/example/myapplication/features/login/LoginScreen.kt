@@ -2,6 +2,7 @@ package com.example.myapplication.features.login
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -69,6 +71,16 @@ fun LoginScreen(
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(
+            text = "Olvide mi contraseña",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.End)
+                .clickable {
+                    viewModel.forgetPassword()
+                }
         )
 
         Button(

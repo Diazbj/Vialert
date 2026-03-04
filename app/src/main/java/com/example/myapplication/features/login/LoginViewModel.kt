@@ -37,4 +37,9 @@ class LoginViewModel : ViewModel() {
         email.reset()
         password.reset()
     }
+
+    fun forgetPassword(){
+
+    }
+
 }

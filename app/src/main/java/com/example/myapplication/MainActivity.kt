@@ -24,15 +24,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.core.theme.MyApplicationTheme
+import com.example.myapplication.features.forgetPassword.ForgetPassword
 import com.example.myapplication.features.home.HomeScreen
 import com.example.myapplication.features.login.LoginScreen
+import com.example.myapplication.features.resetPassword.ResetPassword
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            LoginScreen()
+            ResetPassword()
         }
     }
 }
