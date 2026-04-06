@@ -1,40 +1,39 @@
 package com.example.myapplication.features.home
 
-import android.icu.text.ListFormatter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.myapplication.core.navigation.Login
+import com.example.myapplication.core.navigation.SignUp
 import com.example.myapplication.R
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController? = null) {
 
     Column(
         modifier = Modifier
@@ -51,34 +50,27 @@ fun HomeScreen() {
             contentDescription = "Logo"
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
         Text(
-            text = "Bienvenido",
-            fontSize = 26.sp,
-            color = Color.DarkGray
-        )
-
-        Spacer(modifier = Modifier.height(50.dp))
-
-        Text(
-            text = "Crea una cuenta y empieza a disfrutar de todas las funciones de Vialert",
+            text = "Reporta problemas viales en tiempo real y construye una ciudad más segura para todos",
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
             color = Color.Gray
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(90.dp))
 
         // Botón Registrarme
         Button(
-            onClick = {},
+            onClick = {
+                navController?.navigate(SignUp)
+            },
             modifier = Modifier
-                .width(200.dp)
-                .height(40.dp),
-            shape = RoundedCornerShape(50),
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(30),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6A1B9A)
+                containerColor = Color(0xFF6A1B9A),
+                contentColor = Color.White
             )
         ) {
             Text(text = "Registrarme")
@@ -86,27 +78,29 @@ fun HomeScreen() {
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        // Botón Iniciar sesión
+        OutlinedButton(
+            onClick = {
+                navController?.navigate(Login)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(30),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6A1B9A))
+        ) {
+            Text(text = "Iniciar Sesión")
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
         Text(
-            text = "Accede con tu cuenta para continuar tus rutas y actividades.",
+            text = "VIGILANCIA CIUDADANA INTELIGENTE.",
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             color = Color.Gray
         )
 
         Spacer(modifier = Modifier.height(15.dp))
-
-        // Botón Iniciar sesión
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .width(200.dp)
-                .height(40.dp),
-            shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6A1B9A)
-            )
-        ) {
-            Text(text = "Iniciar Sesión")
-        }
     }
 }

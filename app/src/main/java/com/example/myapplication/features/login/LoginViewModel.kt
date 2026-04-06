@@ -1,10 +1,16 @@
 package com.example.myapplication.features.login
 
 import android.util.Patterns
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.core.utils.ValidatedField
 
 class LoginViewModel : ViewModel() {
+
+    private val defaultEmail = "usuario@vialert.com"
+    private val defaultPassword = "vialert123"
 
     val email = ValidatedField("") { value ->
         when {
@@ -25,6 +31,9 @@ class LoginViewModel : ViewModel() {
     val isFormValid: Boolean
         get() = email.isValid && password.isValid
 
+    var shouldShowInvalidCredentialsDialog by mutableStateOf(false)
+        private set
+
     fun login(): String {
         return if (isFormValid) {
             "Login exitoso"
@@ -40,6 +49,24 @@ class LoginViewModel : ViewModel() {
 
     fun forgetPassword(){
 
+    }
+
+    fun onPasswordChanged(newPassword: String) {
+        password.onChange(newPassword)
+    }
+
+    fun loginFunction(): Boolean {
+        val credentialsMatch =
+            email.value == defaultEmail && password.value == defaultPassword
+
+        val isLoginSuccessful = isFormValid && credentialsMatch
+        shouldShowInvalidCredentialsDialog = !isLoginSuccessful
+
+        return isLoginSuccessful
+    }
+
+    fun dismissInvalidCredentialsDialog() {
+        shouldShowInvalidCredentialsDialog = false
     }
 
 }

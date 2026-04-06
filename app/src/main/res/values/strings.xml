@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="home_user_topbar_title">Vialert</string>
+    <string name="home_user_notifications_content_description">Notificaciones</string>
+    <string name="home_user_support_content_description">Soporte</string>
+    <string name="home_user_welcome">Bienvenido, %1$s</string>
+    <string name="home_user_recent_reports">Reportes recientes</string>
+    <string name="home_user_report_type">Tipo: %1$s</string>
+    <string name="home_user_report_important">! Es importante (%1$d)</string>
+    <string name="home_user_share_content_description">Compartir reporte</string>
+    <string name="home_user_nav_home">Inicio</string>
+    <string name="home_user_nav_reports">Reportes</string>
+    <string name="home_user_nav_explore">Explorar</string>
+    <string name="home_user_nav_profile">Perfil</string>
+    <string name="home_user_create_report">Crear reporte</string>
 </resources>
