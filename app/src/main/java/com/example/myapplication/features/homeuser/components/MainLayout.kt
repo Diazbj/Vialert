@@ -18,6 +18,8 @@ import com.example.myapplication.core.navigation.Notifications
 @Composable
 fun MainLayout(
     navController: NavController?,
+    topBarTitleRes: Int = R.string.home_user_topbar_title,
+    showNotificationsAction: Boolean = true,
     showSupportFab: Boolean = false,
     onSupportClick: (() -> Unit)? = null,
     content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit
@@ -38,6 +40,8 @@ fun MainLayout(
     Scaffold(
         topBar = {
             HomeUserTopBar(
+                title = stringResource(id = topBarTitleRes),
+                showNotificationsAction = showNotificationsAction,
                 onTitleClick = { onNavigate(HomeUser) },
                 onNotificationsClick = { navController?.navigate(Notifications) }
             )

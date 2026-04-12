@@ -11,8 +11,8 @@ import com.example.myapplication.features.homeuser.HomeUserScreen
 import com.example.myapplication.features.login.LoginScreen
 import com.example.myapplication.features.notifications.NotificationsScreen
 import com.example.myapplication.features.profile.ProfileScreen
-import com.example.myapplication.features.reportdetail.ReportDetailScreen
-import com.example.myapplication.features.reports.ReportsScreen
+import com.example.myapplication.features.reportdetail.NewReportScreen
+import com.example.myapplication.features.reports.MyReportsScreen
 import com.example.myapplication.features.resetPassword.ResetPassword
 import com.example.myapplication.features.signup.SignUpScreen
 
@@ -43,10 +43,10 @@ fun AppNavigation() {
             HomeUserScreen(navController = navController)
         }
         composable<Reports> {
-            ReportsScreen(navController = navController)
+            MyReportsScreen(navController = navController)
         }
         composable<ReportDetail> {
-            ReportDetailScreen(navController = navController)
+            NewReportScreen(navController = navController)
         }
         composable<Explore> {
             ExploreScreen(navController = navController)

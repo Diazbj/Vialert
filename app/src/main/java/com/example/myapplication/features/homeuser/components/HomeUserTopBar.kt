@@ -19,13 +19,15 @@ import com.example.myapplication.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeUserTopBar(
+    title: String,
+    showNotificationsAction: Boolean,
     onTitleClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
     TopAppBar(
         title = {
             Text(
-                text = stringResource(id = R.string.home_user_topbar_title),
+                text = title,
                 style = MaterialTheme.typography.headlineLarge,
                 fontSize = 28.sp,
                 color = Color(0xFF6A1B9A),
@@ -33,11 +35,13 @@ fun HomeUserTopBar(
             )
         },
         actions = {
-            IconButton(onClick = onNotificationsClick) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = stringResource(id = R.string.home_user_notifications_content_description)
-                )
+            if (showNotificationsAction) {
+                IconButton(onClick = onNotificationsClick) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = stringResource(id = R.string.home_user_notifications_content_description)
+                    )
+                }
             }
         }
     )

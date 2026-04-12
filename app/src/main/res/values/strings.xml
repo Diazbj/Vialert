@@ -13,4 +13,13 @@
     <string name="home_user_nav_explore">Explorar</string>
     <string name="home_user_nav_profile">Perfil</string>
     <string name="home_user_create_report">Crear reporte</string>
+    <string name="notifications_topbar_title">Notificaciones</string>
+    <string name="notifications_mark_all">Marcar todas</string>
+    <string name="notifications_empty">No hay notificaciones</string>
+    <string name="notifications_filter_all">Todas</string>
+    <string name="notifications_filter_unread">No leidas</string>
+    <string name="notifications_now">Ahora</string>
+    <string name="notifications_minutes_ago">Hace %1$d min</string>
+    <string name="notifications_hours_ago">Hace %1$d hora</string>
+    <string name="notifications_yesterday">Ayer</string>
 </resources>
