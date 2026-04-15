@@ -8,5 +8,7 @@ data class Report(
     val status: ReportStatus,
     val type: String,
     val photoUrl: String,
-    val ownerId: String
+    val ownerId: String,
+    val createdAt: Long = System.currentTimeMillis(),
+    val important: Int = 0
 )

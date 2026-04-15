@@ -11,4 +11,5 @@ interface UserRepository {
     fun update(user: User)
     fun delete(id: String)
     fun findByEmail(email: String): User?
+    fun findByEmailAndPassword(email: String, password: String): User?
 }

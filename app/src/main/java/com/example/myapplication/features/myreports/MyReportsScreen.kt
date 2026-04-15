@@ -1,4 +1,4 @@
-package com.example.myapplication.features.reports
+package com.example.myapplication.features.myreports
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,15 +44,15 @@ fun MyReportsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Reportes",
+                text = "Mis Reportes",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             ReportsTabs(
-                selectedTab = uiState.selectedTab,
-                onTabSelected = viewModel::filterReports
+                selectedStatus = uiState.selectedStatus,
+                onStatusSelected = viewModel::filterByStatus
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -112,21 +112,29 @@ fun MyReportsScreen(
 
 @Composable
 private fun ReportsTabs(
-    selectedTab: ReportsTab,
-    onTabSelected: (ReportsTab) -> Unit
+    selectedStatus: ReportStatus?,
+    onStatusSelected: (ReportStatus?) -> Unit
 ) {
-    val tabs = listOf(
-        ReportsTab.TODOS to "Todos",
-        ReportsTab.ACTIVOS to "Activos",
-        ReportsTab.FINALIZADOS to "Finalizados"
-    )
+    val tabs = listOf(null) + ReportStatus.entries
 
-    TabRow(selectedTabIndex = tabs.indexOfFirst { it.first == selectedTab }) {
-        tabs.forEachIndexed { index, (tab, title) ->
+    ScrollableTabRow(
+        selectedTabIndex = tabs.indexOf(selectedStatus),
+        edgePadding = 0.dp,
+        divider = {}
+    ) {
+        tabs.forEach { status ->
+            val label = status?.let { 
+                when(it) {
+                    ReportStatus.PENDING -> "Pendiente"
+                    ReportStatus.IN_PROGRESS -> "Verificado"
+                    ReportStatus.RESOLVED -> "Resuelto"
+                }
+            } ?: "Todos"
+            
             Tab(
-                selected = selectedTab == tab,
-                onClick = { onTabSelected(tab) },
-                text = { Text(text = title) }
+                selected = selectedStatus == status,
+                onClick = { onStatusSelected(status) },
+                text = { Text(text = label) }
             )
         }
     }

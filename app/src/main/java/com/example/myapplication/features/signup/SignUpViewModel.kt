@@ -4,13 +4,27 @@ import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.core.utils.ValidatedField
 import com.example.myapplication.domain.model.Gender
+import com.example.myapplication.domain.model.User
+import com.example.myapplication.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor() : ViewModel() {
+class SignUpViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+
+    private val _registerResult = MutableStateFlow<RequestResult?>(null)
+    val registerResult: StateFlow<RequestResult?> = _registerResult.asStateFlow()
 
     val firstName = ValidatedField("") { value ->
         if (value.isEmpty()) "El nombre es obligatorio" else null
@@ -47,7 +61,6 @@ class SignUpViewModel @Inject constructor() : ViewModel() {
 
     private val _passwordStrengthLevel = mutableStateOf(0)
     val passwordStrengthLevel: State<Int> = _passwordStrengthLevel
-
     private val _passwordStrengthText = mutableStateOf("Muy Débil")
     val passwordStrengthText: State<String> = _passwordStrengthText
 
@@ -109,12 +122,39 @@ class SignUpViewModel @Inject constructor() : ViewModel() {
             birthDate.isValid &&
             hasAcceptedTerms.value
 
-    fun onSubmit(): String {
-        return if (isFormValid) {
-            "Registro exitoso"
-        } else {
-            "Formulario inválido"
+    fun onSubmit() {
+        if (isFormValid) {
+            viewModelScope.launch {
+                _registerResult.value = RequestResult.Loading
+                if (userRepository.findByEmail(email.value) != null) {
+                    _registerResult.value = RequestResult.Failure("El email ya está registrado")
+                    return@launch
+                }
+                _registerResult.value = try {
+                    userRepository.create(
+                        User(
+                            id = UUID.randomUUID().toString(),
+                            firstName = firstName.value,
+                            lastName = lastName.value,
+                            email = email.value,
+                            userName = userName.value,
+                            password = password.value,
+                            gender = selectedGender.value,
+                            birthDate = birthDate.value,
+                            score = 0,
+                            profilePictureUrl = ""
+                        )
+                    )
+                    RequestResult.Success("Usuario registrado exitosamente")
+                } catch (e: Exception) {
+                    RequestResult.Failure(e.message ?: "Error registrando al usuario")
+                }
+            }
         }
+    }
+
+    fun clearResult() {
+        _registerResult.value = null
     }
 
     fun onTermsAcceptanceChange(isAccepted: Boolean) {
@@ -127,11 +167,10 @@ class SignUpViewModel @Inject constructor() : ViewModel() {
         email.reset()
         userName.reset()
         password.reset()
-        _passwordStrengthLevel.value = 0
-        _passwordStrengthText.value = "Muy Débil"
-        _selectedGender.value = null
         gender.reset()
         birthDate.reset()
         hasAcceptedTerms.value = false
+        clearResult()
     }
+
 }

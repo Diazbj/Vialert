@@ -1,11 +1,17 @@
 package com.example.myapplication.features.homeuser
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import android.text.format.DateUtils
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.repository.ReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -13,29 +19,54 @@ class HomeUserViewModel @Inject constructor(
     private val reportRepository: ReportRepository
 ) : ViewModel() {
 
-    private val _uiState = mutableStateOf(
-        HomeUserUiState(
-            userName = "Juan",
-            reports = reportRepository.getAll(),
-            reportTimes = mockReportTimes,
-            reportImportanceCounts = mockImportanceCounts
-        )
-    )
+    private val _uiState = MutableStateFlow(HomeUserUiState(userName = "Juan"))
+    val uiState: StateFlow<HomeUserUiState> = _uiState.asStateFlow()
 
-    val uiState: State<HomeUserUiState> = _uiState
+    init {
+        observeReports()
+        startTimer()
+    }
 
-    companion object {
-        private val mockReportTimes = mapOf(
-            "101" to "Hace 12 min",
-            "102" to "Hace 1 h",
-            "103" to "Hace 3 h"
-        )
+    private fun observeReports() {
+        viewModelScope.launch {
+            reportRepository.reports.collect { reports ->
+                _uiState.update { state ->
+                    state.copy(
+                        reports = reports,
+                        reportTimes = generateTimes(reports)
+                    )
+                }
+            }
+        }
+    }
 
-        private val mockImportanceCounts = mapOf(
-            "101" to 19,
-            "102" to 11,
-            "103" to 7
-        )
+    private fun startTimer() {
+        viewModelScope.launch {
+            while (true) {
+                delay(60000)
+                val reports = _uiState.value.reports
+                if (reports.isNotEmpty()) {
+                    _uiState.update { it.copy(reportTimes = generateTimes(reports)) }
+                }
+            }
+        }
+    }
+
+    private fun generateTimes(reports: List<Report>): Map<String, String> {
+        return reports.associate { report ->
+            report.id to DateUtils.getRelativeTimeSpanString(
+                report.createdAt,
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS,
+                DateUtils.FORMAT_ABBREV_RELATIVE
+            ).toString()
+        }
+    }
+
+    fun onImportantClick(reportId: String) {
+        viewModelScope.launch {
+            reportRepository.incrementarImportancia(reportId)
+        }
     }
 
     fun onSupportAction() {
@@ -46,6 +77,5 @@ class HomeUserViewModel @Inject constructor(
 data class HomeUserUiState(
     val userName: String = "",
     val reports: List<Report> = emptyList(),
-    val reportTimes: Map<String, String> = emptyMap(),
-    val reportImportanceCounts: Map<String, Int> = emptyMap()
+    val reportTimes: Map<String, String> = emptyMap()
 )

@@ -12,43 +12,46 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.core.components.ResultDialog
+import com.example.myapplication.core.components.VialertTextField
+import com.example.myapplication.core.utils.RequestResult
+import kotlin.Any
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun ForgetPassword(
+fun ForgetPasswordScreen(
     viewModel: ForgetPasswordViewModel = hiltViewModel(),
-    navController: NavController? = null
+    navController: NavController? = null,
+    onNavigateToRegister: Any
 ){
+    val forgetPasswordResult by viewModel.forgetPasswordResult.collectAsState()
 
-    val blackFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color.Black,
-        unfocusedTextColor = Color.Black,
-        cursorColor = Color.Black,
-        focusedLabelColor = Color.Black,
-        unfocusedLabelColor = Color.Black,
-        focusedPlaceholderColor = Color.Black,
-        unfocusedPlaceholderColor = Color.Black,
-        focusedBorderColor = Color.Black,
-        unfocusedBorderColor = Color.Black
+    ResultDialog(
+        result = forgetPasswordResult,
+        onDismiss = {
+            if (forgetPasswordResult is RequestResult.Success) {
+                viewModel.resetForm()
+                navController?.popBackStack()
+            } else {
+                viewModel.clearResult()
+            }
+        }
     )
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxSize().padding(30.dp),
@@ -82,24 +85,22 @@ fun ForgetPassword(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
+        VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = { Text("Correo electrónico") },
-            placeholder = { Text("correo@ejemplo.com") },
+            label = "Correo electrónico",
+            placeholder = "correo@ejemplo.com",
             isError = viewModel.email.error != null,
-            supportingText = viewModel.email.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.email.error
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                // viewModel.onSubmit()
+                viewModel.onSubmit()
             },
+            enabled = forgetPasswordResult !is RequestResult.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
@@ -109,7 +110,15 @@ fun ForgetPassword(
                 contentColor = Color.White
             )
         ) {
-            Text(text = "Enviar enlace")
+            if (forgetPasswordResult is RequestResult.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Enviar enlace")
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

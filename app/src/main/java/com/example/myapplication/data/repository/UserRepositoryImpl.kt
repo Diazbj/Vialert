@@ -23,6 +23,9 @@ class UserRepositoryImpl @Inject constructor() : UserRepository {
     }
 
     override fun create(user: User) {
+        if (findByEmail(user.email) != null) {
+            return
+        }
         val currentList = _users.value.toMutableList()
         currentList.add(user)
         _users.value = currentList
@@ -47,38 +50,43 @@ class UserRepositoryImpl @Inject constructor() : UserRepository {
         return _users.value.find { it.email == email }
     }
 
+    override fun findByEmailAndPassword(
+        email: String,
+        password: String
+    ): User? {
+        return _users.value.find { it.email == email && it.password == password }
+    }
+
     private fun fetchUsers(): List<User> {
         return listOf(
             User(
                 id = "1",
-                name = "Juan Perez",
-                city = "Asunción",
-                address = "Calle Palma 123",
+                firstName = "Juan",
+                lastName = "Perez",
                 email = "juan@vialert.com",
+                userName = "juanp",
                 password = "password123",
-                phoneNumber = "0981123456",
                 role = UserRole.USER
             ),
             User(
                 id = "2",
-                name = "Admin Vialert",
-                city = "Asunción",
-                address = "Oficina Central",
+                firstName = "Admin",
+                lastName = "Vialert",
                 email = "admin@vialert.com",
+                userName = "admin",
                 password = "adminpassword",
-                phoneNumber = "0981999999",
                 role = UserRole.ADMIN
             ),
             User(
                 id = "3",
-                name = "Maria Lopez",
-                city = "Fernando de la Mora",
-                address = "Avda. Mcal. Lopez 456",
+                firstName = "Maria",
+                lastName = "Lopez",
                 email = "maria@example.com",
+                userName = "marial",
                 password = "mypassword",
-                phoneNumber = "0971456789",
                 role = UserRole.USER
             )
         )
     }
+
 }

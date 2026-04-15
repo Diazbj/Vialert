@@ -1,11 +1,11 @@
-package com.example.myapplication.features.reportdetail
+package com.example.myapplication.features.newreport
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,7 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.myapplication.domain.model.Location
+import com.example.myapplication.core.components.ResultDialog
+import com.example.myapplication.core.utils.RequestResult
+import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.features.homeuser.components.MainLayout
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,7 +25,21 @@ fun NewReportScreen(
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val submitResult by viewModel.submitResult.collectAsState()
     var isCategoryExpanded by remember { mutableStateOf(false) }
+
+    // Manejo de feedback mediante ResultDialog
+    ResultDialog(
+        result = submitResult,
+        onDismiss = {
+            if (submitResult is RequestResult.Success) {
+                viewModel.resetForm()
+                navController?.popBackStack()
+            } else {
+                viewModel.clearResult()
+            }
+        }
+    )
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -31,6 +47,7 @@ fun NewReportScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
                 .imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -41,23 +58,25 @@ fun NewReportScreen(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
+            // Título (Corresponde a title en Report)
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = viewModel::updateTitle,
-                label = { Text("Titulo del reporte") },
+                label = { Text("Título del reporte") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Categoría (Corresponde a type en Report)
             ExposedDropdownMenuBox(
                 expanded = isCategoryExpanded,
                 onExpandedChange = { isCategoryExpanded = !isCategoryExpanded }
             ) {
                 OutlinedTextField(
-                    value = uiState.category.orEmpty(),
+                    value = uiState.category?.displayName ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Categoria") },
+                    label = { Text("Categoría") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryExpanded)
                     },
@@ -70,9 +89,9 @@ fun NewReportScreen(
                     expanded = isCategoryExpanded,
                     onDismissRequest = { isCategoryExpanded = false }
                 ) {
-                    uiState.categories.forEach { category ->
+                    ReportCategory.entries.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category) },
+                            text = { Text(category.displayName) },
                             onClick = {
                                 viewModel.updateCategory(category)
                                 isCategoryExpanded = false
@@ -82,21 +101,23 @@ fun NewReportScreen(
                 }
             }
 
+            // Descripción (Corresponde a description en Report)
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = viewModel::updateDescription,
-                label = { Text("Descripcion") },
+                label = { Text("Descripción") },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // SECCIÓN UBICACIÓN (Implementación futura de location)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Ubicacion",
+                        text = "Ubicación (Próximamente)",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -104,7 +125,7 @@ fun NewReportScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(140.dp)
+                            .height(100.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                                 shape = RoundedCornerShape(10.dp)
@@ -112,86 +133,46 @@ fun NewReportScreen(
                         contentAlignment = androidx.compose.ui.Alignment.Center
                     ) {
                         Text(
-                            text = "Mapa disponible proximamente",
+                            text = "Mapa no disponible",
                             color = MaterialTheme.colorScheme.outline,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
-
-                    Text(
-                        text = uiState.address,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.updateLocation(
-                                location = Location(latitude = 4.6483, longitude = -74.2479),
-                                address = "Av. Principal #123, Bogota"
-                            )
-                        }
-                    ) {
-                        Text("Seleccionar ubicacion (demo)")
-                    }
                 }
             }
 
+            // SECCIÓN FOTOS (Implementación futura de photoUrl)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Fotos",
+                        text = "Fotos (Próximamente)",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-
-                    OutlinedButton(
-                        onClick = {
-                            val next = uiState.images.size + 1
-                            viewModel.addImage("Imagen $next")
-                        }
-                    ) {
-                        Text("Anadir imagen (demo)")
-                    }
-
-                    if (uiState.images.isNotEmpty()) {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(uiState.images, key = { it }) { image ->
-                                ElevatedAssistChip(
-                                    onClick = { viewModel.removeImage(image) },
-                                    label = { Text(image) },
-                                    trailingIcon = {
-                                        Text(
-                                            text = "x",
-                                            color = Color(0xFF6A1B9A)
-                                        )
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    
+                    Text(
+                        text = "La carga de imágenes será habilitada en futuras versiones.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
             }
 
-            if (uiState.message != null) {
-                AssistChip(
-                    onClick = viewModel::clearMessage,
-                    label = { Text(uiState.message ?: "") }
-                )
-            }
+            Spacer(modifier = Modifier.weight(1f))
 
+            // Botón Publicar
             Button(
                 onClick = viewModel::createReport,
-                enabled = uiState.isFormValid && uiState.submitState != NewReportSubmitState.LOADING,
+                enabled = uiState.isFormValid && submitResult !is RequestResult.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                if (uiState.submitState == NewReportSubmitState.LOADING) {
+                if (submitResult is RequestResult.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         strokeWidth = 2.dp,

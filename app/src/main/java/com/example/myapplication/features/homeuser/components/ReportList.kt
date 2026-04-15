@@ -14,8 +14,7 @@ import com.example.myapplication.domain.model.Report
 fun ReportList(
     reports: List<Report>,
     reportTimes: Map<String, String>,
-    importanceCounts: Map<String, Int>,
-    onImportantClick: (Report) -> Unit,
+    onImportantClick: (String) -> Unit,
     onShareClick: (Report) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -29,8 +28,10 @@ fun ReportList(
             ReportCard(
                 report = report,
                 timeLabel = reportTimes[report.id].orEmpty(),
-                importantCount = importanceCounts[report.id] ?: 0,
-                onImportantClick = onImportantClick,
+                importantCount = report.important,
+                onImportantClick = { reportToIncrement -> 
+                    onImportantClick(reportToIncrement.id) 
+                },
                 onShareClick = onShareClick
             )
         }

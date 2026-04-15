@@ -6,7 +6,7 @@
     <string name="home_user_welcome">Bienvenido, %1$s</string>
     <string name="home_user_recent_reports">Reportes recientes</string>
     <string name="home_user_report_type">Tipo: %1$s</string>
-    <string name="home_user_report_important">! Es importante (%1$d)</string>
+    <string name="home_user_report_important">¡Es Importante! (%1$d)</string>
     <string name="home_user_share_content_description">Compartir reporte</string>
     <string name="home_user_nav_home">Inicio</string>
     <string name="home_user_nav_reports">Reportes</string>

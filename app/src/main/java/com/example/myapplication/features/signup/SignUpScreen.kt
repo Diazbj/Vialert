@@ -5,44 +5,43 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.core.components.ResultDialog
+import com.example.myapplication.core.components.VialertPasswordField
+import com.example.myapplication.core.components.VialertTextField
+import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.domain.model.Gender
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel = hiltViewModel(),
-    navController: NavController? = null
+    navController: NavController? = null,
+    onNavigateToBack: () -> Unit
 ) {
-    var isPasswordVisible by remember { mutableStateOf(false) }
+    val registerResult by viewModel.registerResult.collectAsState()
     var isGenderMenuExpanded by remember { mutableStateOf(false) }
-    
-    val blackFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color.Black,
-        unfocusedTextColor = Color.Black,
-        cursorColor = Color.Black,
-        focusedLabelColor = Color.Black,
-        unfocusedLabelColor = Color.Black,
-        focusedPlaceholderColor = Color.Black,
-        unfocusedPlaceholderColor = Color.Black,
-        focusedBorderColor = Color.Black,
-        unfocusedBorderColor = Color.Black
+
+    // El diálogo se muestra basándose directamente en el estado del registerResult
+    ResultDialog(
+        result = registerResult,
+        onDismiss = {
+            if (registerResult is RequestResult.Success) {
+                viewModel.resetForm()
+                //onNavigateToBack()
+            } else {
+                viewModel.clearResult()
+            }
+        }
     )
 
     Column(
@@ -76,78 +75,55 @@ fun SignUpScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
+            VialertTextField(
                 value = viewModel.firstName.value,
                 onValueChange = { viewModel.firstName.onChange(it) },
-                label = { Text("Nombre") },
-                placeholder = { Text("Ej: Juan") },
+                label = "Nombre",
+                placeholder = "Ej: Juan",
                 isError = viewModel.firstName.error != null,
-                supportingText = viewModel.firstName.error?.let { error -> { Text(error) } },
-                colors = blackFieldColors,
-                singleLine = true,
+                supportingText = viewModel.firstName.error,
                 modifier = Modifier.weight(1f)
             )
-            OutlinedTextField(
+            VialertTextField(
                 value = viewModel.lastName.value,
                 onValueChange = { viewModel.lastName.onChange(it) },
-                label = { Text("Apellido") },
-                placeholder = { Text("Ej: Pérez") },
+                label = "Apellido",
+                placeholder = "Ej: Pérez",
                 isError = viewModel.lastName.error != null,
-                supportingText = viewModel.lastName.error?.let { error -> { Text(error) } },
-                colors = blackFieldColors,
-                singleLine = true,
+                supportingText = viewModel.lastName.error,
                 modifier = Modifier.weight(1f)
             )
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        OutlinedTextField(
+        VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = { Text("Correo electrónico") },
-            placeholder = { Text("correo@ejemplo.com") },
+            label = "Correo electrónico",
+            placeholder = "correo@ejemplo.com",
             isError = viewModel.email.error != null,
-            supportingText = viewModel.email.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.email.error
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        OutlinedTextField(
+        VialertTextField(
             value = viewModel.userName.value,
             onValueChange = { viewModel.userName.onChange(it) },
-            label = { Text("Nombre de usuario") },
-            placeholder = { Text("@usuario123") },
+            label = "Nombre de usuario",
+            placeholder = "@usuario123",
             isError = viewModel.userName.error != null,
-            supportingText = viewModel.userName.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.userName.error
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        OutlinedTextField(
+        VialertPasswordField(
             value = viewModel.password.value,
             onValueChange = { viewModel.onPasswordChanged(it) },
-            label = { Text("Contraseña") },
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = viewModel.password.error != null,
-            supportingText = viewModel.password.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.password.error
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -186,18 +162,17 @@ fun SignUpScreen(
                 onExpandedChange = { isGenderMenuExpanded = !isGenderMenuExpanded },
                 modifier = Modifier.weight(1f)
             ) {
-                OutlinedTextField(
+                VialertTextField(
                     value = viewModel.selectedGender.value?.let { gender ->
                         gender.name.lowercase().replaceFirstChar { it.uppercase() }.replace("_", " ")
                     } ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Género") },
+                    label = "Género",
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isGenderMenuExpanded) },
                     isError = viewModel.gender.error != null,
-                    supportingText = viewModel.gender.error?.let { error -> { Text(error) } },
-                    colors = blackFieldColors,
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    supportingText = viewModel.gender.error,
+                    modifier = Modifier.menuAnchor()
                 )
 
                 ExposedDropdownMenu(
@@ -217,16 +192,13 @@ fun SignUpScreen(
                 }
             }
 
-            OutlinedTextField(
+            VialertTextField(
                 value = viewModel.birthDate.value,
                 onValueChange = { viewModel.birthDate.onChange(it) },
-                label = { Text("F. Nacimiento") },
-                placeholder = { Text("DD/MM/AAAA") },
+                label = "F. Nacimiento",
+                placeholder = "DD/MM/AAAA",
                 isError = viewModel.birthDate.error != null,
-                supportingText = viewModel.birthDate.error?.let { error -> { Text(error) } },
-                keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
-                colors = blackFieldColors,
-                singleLine = true,
+                supportingText = viewModel.birthDate.error,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -252,8 +224,9 @@ fun SignUpScreen(
 
         Button(
             onClick = {
-                // viewModel.onSubmit()
+                viewModel.onSubmit()
             },
+            enabled = registerResult !is RequestResult.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
@@ -263,13 +236,21 @@ fun SignUpScreen(
                 contentColor = Color.White
             )
         ) {
-            Text(text = "Crear Cuenta")
+            if (registerResult is RequestResult.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Crear Cuenta")
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
-            onClick = { navController?.popBackStack() },
+            onClick = { onNavigateToBack() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
@@ -280,7 +261,6 @@ fun SignUpScreen(
         }
 
         Spacer(modifier = Modifier.height(15.dp))
-
     }
 
 }

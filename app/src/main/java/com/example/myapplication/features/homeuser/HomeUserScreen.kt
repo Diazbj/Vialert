@@ -15,7 +15,7 @@ fun HomeUserScreen(
     viewModel: HomeUserViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
-    val uiState by viewModel.uiState
+    val uiState by viewModel.uiState.collectAsState()
 
     MainLayout(
         navController = navController,
@@ -32,8 +32,9 @@ fun HomeUserScreen(
             ReportList(
                 reports = uiState.reports,
                 reportTimes = uiState.reportTimes,
-                importanceCounts = uiState.reportImportanceCounts,
-                onImportantClick = {},
+                onImportantClick = { reportId ->
+                    viewModel.onImportantClick(reportId)
+                },
                 onShareClick = {}
             )
         }

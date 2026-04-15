@@ -3,42 +3,40 @@ package com.example.myapplication.features.login
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.core.components.ResultDialog
+import com.example.myapplication.core.components.VialertPasswordField
+import com.example.myapplication.core.components.VialertTextField
 import com.example.myapplication.core.navigation.ForgetPassword
 import com.example.myapplication.core.navigation.HomeUser
+import com.example.myapplication.core.utils.RequestResult
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    navController: NavController? = null
+    navController: NavController? = null,
+    onNavigateToRegister: () -> Unit
 ) {
-    var isPasswordVisible by remember { mutableStateOf(false) }
+    val loginResult by viewModel.loginResult.collectAsState()
 
-    val blackFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color.Black,
-        unfocusedTextColor = Color.Black,
-        cursorColor = Color.Black,
-        focusedLabelColor = Color.Black,
-        unfocusedLabelColor = Color.Black,
-        focusedPlaceholderColor = Color.Black,
-        unfocusedPlaceholderColor = Color.Black,
-        focusedBorderColor = Color.Black,
-        unfocusedBorderColor = Color.Black
+    ResultDialog(
+        result = loginResult,
+        onDismiss = {
+            if (loginResult is RequestResult.Success) {
+                viewModel.clearResult()
+                navController?.navigate(HomeUser)
+            } else {
+                viewModel.clearResult()
+            }
+        }
     )
 
     Column(
@@ -66,16 +64,13 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
-        OutlinedTextField(
+        VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = { Text("Correo electrónico") },
-            placeholder = { Text("correo@ejemplo.com") },
+            label = "Correo electrónico",
+            placeholder = "correo@ejemplo.com",
             isError = viewModel.email.error != null,
-            supportingText = viewModel.email.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.email.error
         )
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -91,34 +86,20 @@ fun LoginScreen(
                 }
         )
 
-        OutlinedTextField(
+        VialertPasswordField(
             value = viewModel.password.value,
             onValueChange = { viewModel.onPasswordChanged(it) },
-            label = { Text("Contraseña") },
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = viewModel.password.error != null,
-            supportingText = viewModel.password.error?.let { error -> { Text(error) } },
-            colors = blackFieldColors,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            supportingText = viewModel.password.error
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                if (viewModel.loginFunction()) {
-                    navController?.navigate(HomeUser)
-                }
+                viewModel.loginFunction()
             },
+            enabled = loginResult !is RequestResult.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
@@ -128,7 +109,15 @@ fun LoginScreen(
                 contentColor = Color.White
             )
         ) {
-            Text(text = "Iniciar Sesión")
+            if (loginResult is RequestResult.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Iniciar Sesión")
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -145,22 +134,12 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(15.dp))
-    }
-
-    if (viewModel.shouldShowInvalidCredentialsDialog) {
-        AlertDialog(
-            onDismissRequest = viewModel::dismissInvalidCredentialsDialog,
-            title = {
-                Text(text = "Datos inválidos")
-            },
-            text = {
-                Text(text = "El correo electrónico o la contraseña no coinciden con los valores esperados.")
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::dismissInvalidCredentialsDialog) {
-                    Text(text = "Aceptar")
-                }
-            }
-        )
+        
+        TextButton(
+            onClick = onNavigateToRegister,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "¿No tienes cuenta? Regístrate", color = Color(0xFF6A1B9A))
+        }
     }
 }
