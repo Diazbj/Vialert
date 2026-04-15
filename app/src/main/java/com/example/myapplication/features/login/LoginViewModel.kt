@@ -6,11 +6,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.core.utils.ValidatedField
+import com.example.myapplication.domain.model.User
+import com.example.myapplication.domain.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
-
-    private val defaultEmail = "usuario@vialert.com"
-    private val defaultPassword = "vialert123"
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val repository: UserRepository
+): ViewModel() {
+    val users: StateFlow<List<User>> = repository.users
 
     val email = ValidatedField("") { value ->
         when {
@@ -56,8 +62,9 @@ class LoginViewModel : ViewModel() {
     }
 
     fun loginFunction(): Boolean {
-        val credentialsMatch =
-            email.value == defaultEmail && password.value == defaultPassword
+        val credentialsMatch = users.value.any { user ->
+            user.email == email.value && user.password == password.value
+        }
 
         val isLoginSuccessful = isFormValid && credentialsMatch
         shouldShowInvalidCredentialsDialog = !isLoginSuccessful

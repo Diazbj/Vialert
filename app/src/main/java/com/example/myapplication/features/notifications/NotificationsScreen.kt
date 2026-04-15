@@ -21,10 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
-import com.example.myapplication.domain.model.NotificacionUsuario
 import com.example.myapplication.domain.model.TipoNotificacion
 import com.example.myapplication.features.homeuser.components.MainLayout
 import java.time.Duration
@@ -32,7 +31,7 @@ import java.time.LocalDateTime
 
 @Composable
 fun NotificationsScreen(
-    viewModel: NotificationsViewModel = viewModel(),
+    viewModel: NotificationsViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -93,7 +92,7 @@ fun NotificationsScreen(
                         items(items = uiState.visibleNotifications, key = { it.id }) { item ->
                             NotificationItem(
                                 item = item,
-                                onClick = { viewModel.markAsRead(item.notificacion.id) }
+                                onClick = { viewModel.markAsRead(item.notification.id) }
                             )
                         }
                     }
@@ -130,11 +129,11 @@ private fun NotificationsTabs(
 
 @Composable
 private fun NotificationItem(
-    item: NotificacionUsuario,
+    item: NotificationDisplayItem,
     onClick: () -> Unit
 ) {
-    val icon = iconForType(item.notificacion.tipo)
-    val relativeTime = relativeTimeLabel(item.notificacion.creadoEn)
+    val icon = iconForType(item.notification.tipo)
+    val relativeTime = relativeTimeLabel(item.notification.creadoEn)
 
     Card(
         modifier = Modifier
@@ -173,13 +172,13 @@ private fun NotificationItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.notificacion.titulo,
+                    text = item.notification.titulo,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = item.notificacion.mensaje,
+                    text = item.notification.mensaje,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

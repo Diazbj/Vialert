@@ -3,11 +3,14 @@ package com.example.myapplication.features.reportdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.model.Location
+import com.example.myapplication.domain.repository.ReportRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class NewReportSubmitState {
 	IDLE,
@@ -36,7 +39,10 @@ data class NewReportUiState(
 		get() = title.isNotBlank() && !category.isNullOrBlank() && description.isNotBlank() && location != null
 }
 
-class NewReportViewModel : ViewModel() {
+@HiltViewModel
+class NewReportViewModel @Inject constructor(
+	private val reportRepository: ReportRepository
+) : ViewModel() {
 
 	private val _uiState = MutableStateFlow(NewReportUiState())
 	val uiState: StateFlow<NewReportUiState> = _uiState.asStateFlow()
@@ -94,6 +100,9 @@ class NewReportViewModel : ViewModel() {
 					message = null
 				)
 			}
+
+			// Simulación de guardado usando el repositorio
+			// En un caso real crearíamos el objeto Report y llamaríamos a reportRepository.create(report)
 
 			_uiState.update {
 				it.copy(

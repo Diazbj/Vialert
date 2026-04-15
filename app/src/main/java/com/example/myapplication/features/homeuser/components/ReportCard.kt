@@ -1,34 +1,27 @@
 package com.example.myapplication.features.homeuser.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.example.myapplication.R
 import com.example.myapplication.domain.model.Report
 
@@ -43,19 +36,29 @@ fun ReportCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        //colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            AsyncImage(
-                model = report.photoUrl,
-                contentDescription = report.title,
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                    //.height(160.dp),
-                contentScale = ContentScale.Crop
-            )
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(report.photoUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = report.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -73,7 +76,7 @@ fun ReportCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                fontSize = 28.sp
+                fontSize = 24.sp
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -98,7 +101,8 @@ fun ReportCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
                     onClick = { onImportantClick(report) },
@@ -122,9 +126,6 @@ fun ReportCard(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
         }
     }
 }

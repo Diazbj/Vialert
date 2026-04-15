@@ -2,7 +2,6 @@ package com.example.myapplication.features.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -17,7 +16,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.core.navigation.ForgetPassword
 import com.example.myapplication.core.navigation.HomeUser
@@ -25,7 +24,7 @@ import com.example.myapplication.core.navigation.HomeUser
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }

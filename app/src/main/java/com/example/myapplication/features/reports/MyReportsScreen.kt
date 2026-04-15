@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.myapplication.core.navigation.ReportDetail
@@ -27,7 +27,7 @@ import com.example.myapplication.features.homeuser.components.MainLayout
 
 @Composable
 fun MyReportsScreen(
-    viewModel: MyReportsViewModel = viewModel(),
+    viewModel: MyReportsViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()

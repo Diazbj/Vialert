@@ -1,10 +1,12 @@
 package com.example.myapplication.features.resetPassword
 
-import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.core.utils.ValidatedField
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ResetPasswordViewModel: ViewModel() {
+@HiltViewModel
+class ResetPasswordViewModel @Inject constructor() : ViewModel() {
 
     val password1 = ValidatedField("") { value ->
         when {

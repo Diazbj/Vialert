@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.domain.model.Gender
 
@@ -28,7 +27,7 @@ import com.example.myapplication.domain.model.Gender
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpScreen(
-    viewModel: SignUpViewModel = viewModel(),
+    viewModel: SignUpViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }

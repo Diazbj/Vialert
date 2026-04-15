@@ -3,8 +3,11 @@ package com.example.myapplication.features.profile
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ProfileViewModel : ViewModel() {
+@HiltViewModel
+class ProfileViewModel @Inject constructor() : ViewModel() {
 
     // Perfil basico
     val name = mutableStateOf("Carlos Mendoza")
@@ -55,4 +58,3 @@ data class Achievement(
     val iconType: String,
     val isLocked: Boolean
 )
-

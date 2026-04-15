@@ -26,15 +26,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
-import com.example.myapplication.core.navigation.Login
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
 fun ForgetPassword(
-    viewModel: ForgetPasswordViewModel = viewModel(),
+    viewModel: ForgetPasswordViewModel = hiltViewModel(),
     navController: NavController? = null
 ){
 

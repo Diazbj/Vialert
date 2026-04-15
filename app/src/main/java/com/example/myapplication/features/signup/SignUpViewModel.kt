@@ -6,8 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.core.utils.ValidatedField
 import com.example.myapplication.domain.model.Gender
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SignUpViewModel : ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor() : ViewModel() {
 
     val firstName = ValidatedField("") { value ->
         if (value.isEmpty()) "El nombre es obligatorio" else null

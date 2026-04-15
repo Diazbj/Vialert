@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.domain.model.Location
 import com.example.myapplication.features.homeuser.components.MainLayout
@@ -19,7 +19,7 @@ import com.example.myapplication.features.homeuser.components.MainLayout
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewReportScreen(
-    viewModel: NewReportViewModel = viewModel(),
+    viewModel: NewReportViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()

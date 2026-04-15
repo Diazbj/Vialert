@@ -12,7 +12,8 @@
         android:label="Vialert"
         android:roundIcon="@mipmap/vialert"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication">
+        android:theme="@style/Theme.MyApplication"
+        android:name=".MyApp">
         <activity
             android:name="com.example.myapplication.MainActivity"
             android:exported="true"

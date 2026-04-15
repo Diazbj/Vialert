@@ -5,16 +5,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.myapplication.R
 import com.example.myapplication.features.homeuser.components.MainLayout
 import com.example.myapplication.features.homeuser.components.ReportList
-import androidx.compose.ui.res.stringResource
 
 @Composable
 fun HomeUserScreen(
-    viewModel: HomeUserViewModel = viewModel(),
+    viewModel: HomeUserViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState
