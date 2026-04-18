@@ -4,6 +4,7 @@ import android.text.format.DateUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.model.Report
+import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.repository.ReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -29,11 +30,14 @@ class HomeUserViewModel @Inject constructor(
 
     private fun observeReports() {
         viewModelScope.launch {
-            reportRepository.reports.collect { reports ->
+            reportRepository.reports.collect { allReports ->
+                // Filtrar reportes eliminados para el Home
+                val activeReports = allReports.filter { it.status != ReportStatus.DELETED }
+                
                 _uiState.update { state ->
                     state.copy(
-                        reports = reports,
-                        reportTimes = generateTimes(reports)
+                        reports = activeReports,
+                        reportTimes = generateTimes(activeReports)
                     )
                 }
             }
@@ -44,9 +48,9 @@ class HomeUserViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 delay(60000)
-                val reports = _uiState.value.reports
-                if (reports.isNotEmpty()) {
-                    _uiState.update { it.copy(reportTimes = generateTimes(reports)) }
+                val currentReports = _uiState.value.reports
+                if (currentReports.isNotEmpty()) {
+                    _uiState.update { it.copy(reportTimes = generateTimes(currentReports)) }
                 }
             }
         }

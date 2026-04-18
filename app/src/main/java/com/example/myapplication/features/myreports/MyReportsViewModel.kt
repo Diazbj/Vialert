@@ -23,9 +23,10 @@ enum class ReportsUiContentState {
 
 data class ReportsUiState(
     val visibleReports: List<Report> = emptyList(),
-    val selectedStatus: ReportStatus? = null, // null representa "TODOS"
+    val selectedStatus: ReportStatus? = null,
     val contentState: ReportsUiContentState = ReportsUiContentState.LOADING,
-    val reportDates: Map<String, String> = emptyMap()
+    val reportDates: Map<String, String> = emptyMap(),
+    val reportToDelete: Report? = null
 )
 
 @HiltViewModel
@@ -77,9 +78,20 @@ class MyReportsViewModel @Inject constructor(
         _selectedStatus.value = status
     }
 
-    fun deleteReport(id: String) {
+    fun showDeleteConfirmation(report: Report) {
+        _uiState.update { it.copy(reportToDelete = report) }
+    }
+
+    fun hideDeleteConfirmation() {
+        _uiState.update { it.copy(reportToDelete = null) }
+    }
+
+    fun deleteReport() {
+        val report = _uiState.value.reportToDelete ?: return
         viewModelScope.launch {
-            reportRepository.delete(id)
+            // Eliminación lógica: cambiamos el estado a DELETED
+            reportRepository.update(report.copy(status = ReportStatus.DELETED))
+            hideDeleteConfirmation()
         }
     }
 
@@ -93,6 +105,6 @@ class MyReportsViewModel @Inject constructor(
     }
 
     private fun generateMockDates(reports: List<Report>): Map<String, String> {
-        return reports.associate { it.id to "Recién actualizado" }
+        return reports.associate { it.id to "Actualizado" }
     }
 }

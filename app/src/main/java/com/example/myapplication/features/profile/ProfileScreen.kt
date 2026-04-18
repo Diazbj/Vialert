@@ -10,8 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.domain.model.UserLevel
 import com.example.myapplication.features.homeuser.components.MainLayout
 
 @Composable
@@ -31,13 +32,11 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     navController: NavController? = null
 ) {
-    val name by viewModel.name
-    val title by viewModel.title
-    val level by viewModel.level
-    val points by viewModel.points
-    val maxPoints by viewModel.maxPoints
-    val nextLevel by viewModel.nextLevel
-    val stats by viewModel.stats
+    val uiState by viewModel.uiState.collectAsState()
+    val user = uiState.user
+    val level = uiState.userLevel
+    val stats = uiState.stats
+    val progress = uiState.pointsProgress
     val logros = viewModel.logros
 
     MainLayout(navController = navController) { innerPadding ->
@@ -45,16 +44,26 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF8FAFC)) // Fondo muy claro
+                .background(Color(0xFFF8FAFC))
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header: Avatar, Name, Badge
+            // Header
             Box(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.size(140.dp)
             ) {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFF1F5F9),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(80.dp), tint = Color.LightGray)
+                    }
+                }
+                
                 Surface(
                     shape = CircleShape,
                     color = Color(0xFFFFD700),
@@ -75,7 +84,7 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = name,
+                text = user?.firstName ?: "Cargando...",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1E293B)
@@ -90,15 +99,15 @@ fun ProfileScreen(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = title,
+                    text = level.displayName,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF6366F1), // Indigo/Purple
+                    color = Color(0xFF6366F1),
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
             Text(
-                text = "Nivel $level • $points pts",
+                text = "Score: ${user?.score ?: 0} pts",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF64748B)
             )
@@ -143,15 +152,20 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatCard("ACTIVOS", stats.active.toString(), Icons.Default.Campaign, Color(0xFFF5F3FF), Color(0xFF8B5CF6), Modifier.weight(1f))
-                StatCard("FINALIZADOS", stats.completed.toString(), Icons.Default.CheckCircle, Color(0xFFF0FDF4), Color(0xFF22C55E), Modifier.weight(1f))
-                StatCard("VERIFICADOS", stats.verified.toString(), Icons.Default.Verified, Color(0xFFEFF6FF), Color(0xFF3B82F6), Modifier.weight(1f))
+                StatCard("PENDIENTES", stats.pending.toString(), Icons.Default.Campaign, Color(0xFFFFF3CD), Color(0xFFFFA000), Modifier.weight(1f))
+                StatCard("VERIFICADOS", stats.verified.toString(), Icons.Default.Verified, Color(0xFFE8E8FF), Color(0xFF1976D2), Modifier.weight(1f))
+                StatCard("RESUELTOS", stats.resolved.toString(), Icons.Default.CheckCircle, Color(0xFFDFF6DD), Color(0xFF388E3C), Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Reputation Progress
-            ReputationCard(points, maxPoints, nextLevel)
+            ReputationCard(
+                current = user?.score ?: 0, 
+                max = level.maxPoints, 
+                nextLevel = UserLevel.entries.getOrNull(level.ordinal + 1)?.displayName ?: "Máximo",
+                progress = progress
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -204,7 +218,6 @@ fun ProfileScreen(
                                     AchievementItem(logro)
                                 }
                             }
-                            // Add empty boxes if the row is not full to maintain spacing
                             repeat(3 - rowItems.size) {
                                 Spacer(modifier = Modifier.weight(1f))
                             }
@@ -253,7 +266,7 @@ fun StatCard(label: String, value: String, icon: ImageVector, bgColor: Color, ic
 }
 
 @Composable
-fun ReputationCard(current: Int, max: Int, nextLevel: String) {
+fun ReputationCard(current: Int, max: Int, nextLevel: String, progress: Float) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -270,7 +283,7 @@ fun ReputationCard(current: Int, max: Int, nextLevel: String) {
             }
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
-                progress = current.toFloat() / max,
+                progress = progress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(10.dp)

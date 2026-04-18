@@ -5,14 +5,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +31,7 @@ import com.example.myapplication.core.navigation.HomeUser
 import com.example.myapplication.core.navigation.MainRoutes
 import com.example.myapplication.core.navigation.Profile
 import com.example.myapplication.core.navigation.Reports
-import com.example.myapplication.core.navigation.ReportDetail
+import com.example.myapplication.core.navigation.NewReport
 
 private data class BottomNavItem(
     val route: MainRoutes,
@@ -40,16 +41,16 @@ private data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(route = HomeUser, icon = Icons.Default.Home, labelRes = R.string.home_user_nav_home),
-    BottomNavItem(route = Reports, icon = Icons.Default.Report, labelRes = R.string.home_user_nav_reports),
+    BottomNavItem(route = HomeUser, icon = Icons.Outlined.Home, labelRes = R.string.home_user_nav_home),
+    BottomNavItem(route = Reports, icon = Icons.Outlined.Report, labelRes = R.string.home_user_nav_reports),
     BottomNavItem(
-        route = ReportDetail,
-        icon = Icons.Default.Add,
+        route = NewReport(), // Cambiado de NewReport a NewReport()
+        icon = Icons.Outlined.Add,
         labelRes = R.string.home_user_create_report,
         showCenterBadge = true
     ),
-    BottomNavItem(route = Explore, icon = Icons.Default.Explore, labelRes = R.string.home_user_nav_explore),
-    BottomNavItem(route = Profile, icon = Icons.Default.Person, labelRes = R.string.home_user_nav_profile)
+    BottomNavItem(route = Explore, icon = Icons.Outlined.Explore, labelRes = R.string.home_user_nav_explore),
+    BottomNavItem(route = Profile, icon = Icons.Outlined.Person, labelRes = R.string.home_user_nav_profile)
 )
 
 @Composable
@@ -58,18 +59,20 @@ fun HomeBottomNavBar(
     onNavigate: (MainRoutes) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    NavigationBar(modifier = modifier.fillMaxWidth()) {
+    NavigationBar(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = Color.White,
+        tonalElevation = 0.dp
+    ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             bottomNavItems.forEach { item ->
                 val selected = when (item.route) {
                     HomeUser -> currentDestination?.hierarchy?.any { it.hasRoute<HomeUser>() } == true
                     Reports -> currentDestination?.hierarchy?.any { it.hasRoute<Reports>() } == true
-                    ReportDetail -> currentDestination?.hierarchy?.any { it.hasRoute<ReportDetail>() } == true
+                    is NewReport -> currentDestination?.hierarchy?.any { it.hasRoute<NewReport>() } == true
                     Explore -> currentDestination?.hierarchy?.any { it.hasRoute<Explore>() } == true
                     Profile -> currentDestination?.hierarchy?.any { it.hasRoute<Profile>() } == true
-                    else -> {
-                        false
-                    }
+                    else -> false
                 }
 
                 NavigationBarItem(
@@ -80,25 +83,33 @@ fun HomeBottomNavBar(
                             Surface(
                                 modifier = Modifier.size(36.dp),
                                 shape = CircleShape,
-                                color = Color(0xFF6A1B9A),
-                                contentColor = Color.White
+                                color = Color(0xFF6A1B9A).copy(alpha = 0.1f),
+                                contentColor = Color(0xFF6A1B9A)
                             ) {
                                 Icon(
-                                    modifier = Modifier.size(20.dp),
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = stringResource(id = R.string.home_user_create_report)
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = stringResource(id = R.string.home_user_create_report),
+                                    tint = Color(0xFF6A1B9A)
                                 )
                             }
                         } else {
                             Icon(
                                 imageVector = item.icon,
-                                contentDescription = stringResource(id = item.labelRes)
+                                contentDescription = stringResource(id = item.labelRes),
+                                tint = if (selected) Color(0xFF6A1B9A) else Color.Gray
                             )
                         }
                     },
                     label = {
-                        Text(text = stringResource(id = item.labelRes))
-                    }
+                        Text(
+                            text = stringResource(id = item.labelRes),
+                            color = if (selected) Color(0xFF6A1B9A) else Color.Gray
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color.Transparent
+                    )
                 )
             }
         }

@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,7 +21,9 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.myapplication.R
+import com.example.myapplication.core.components.StatusCategoryChip
 import com.example.myapplication.domain.model.Report
+import com.example.myapplication.domain.model.ReportCategory
 
 @Composable
 fun ReportCard(
@@ -62,13 +62,24 @@ fun ReportCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = report.type.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF6A1B9A)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val categoryEnum = ReportCategory.entries.find { it.displayName == report.type }
+                StatusCategoryChip(
+                    text = categoryEnum?.displayName ?: report.type,
+                    baseColor = categoryEnum?.color ?: Color.Gray
+                )
+                
+                StatusCategoryChip(
+                    text = report.status.displayName,
+                    baseColor = report.status.color
+                )
+            }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = report.title,

@@ -19,7 +19,6 @@ class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val sessionDataStore: SessionDataStore
 ): ViewModel() {
-
     private val _loginResult = MutableStateFlow<RequestResult?>(null)
     val loginResult: StateFlow<RequestResult?> = _loginResult.asStateFlow()
 

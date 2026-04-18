@@ -1,27 +1,32 @@
 package com.example.myapplication.features.myreports
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.example.myapplication.core.components.StatusCategoryChip
 import com.example.myapplication.core.navigation.ReportDetail
+import com.example.myapplication.core.navigation.NewReport
+import com.example.myapplication.core.theme.VialertPurple
 import com.example.myapplication.domain.model.Report
+import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.features.homeuser.components.MainLayout
 
@@ -31,6 +36,28 @@ fun MyReportsScreen(
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Diálogo de confirmación para eliminación lógica
+    if (uiState.reportToDelete != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::hideDeleteConfirmation,
+            title = { Text("Eliminar Reporte") },
+            text = { Text("¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(
+                    onClick = viewModel::deleteReport,
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::hideDeleteConfirmation) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     MainLayout(
         navController = navController,
@@ -46,7 +73,7 @@ fun MyReportsScreen(
             Text(
                 text = "Mis Reportes",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = VialertPurple,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -63,7 +90,7 @@ fun MyReportsScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = VialertPurple)
                     }
                 }
 
@@ -83,20 +110,20 @@ fun MyReportsScreen(
                 ReportsUiContentState.SUCCESS -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(uiState.visibleReports, key = { it.id }) { report ->
                             ReportItemCard(
                                 report = report,
-                                date = uiState.reportDates[report.id].orEmpty(),
+                                dateLabel = uiState.reportDates[report.id].orEmpty(),
                                 onViewDetails = {
-                                    navController?.navigate(ReportDetail)
+                                    navController?.navigate(ReportDetail(reportId = report.id))
                                 },
                                 onEdit = {
-                                    navController?.navigate(ReportDetail)
+                                    navController?.navigate(NewReport(reportId = report.id))
                                 },
                                 onDelete = {
-                                    viewModel.deleteReport(report.id)
+                                    viewModel.showDeleteConfirmation(report)
                                 },
                                 onMarkResolved = {
                                     viewModel.markAsResolved(report.id)
@@ -116,25 +143,35 @@ private fun ReportsTabs(
     onStatusSelected: (ReportStatus?) -> Unit
 ) {
     val tabs = listOf(null) + ReportStatus.entries
+    val selectedIndex = tabs.indexOf(selectedStatus)
 
     ScrollableTabRow(
-        selectedTabIndex = tabs.indexOf(selectedStatus),
+        selectedTabIndex = selectedIndex.coerceAtLeast(0),
         edgePadding = 0.dp,
-        divider = {}
+        divider = {},
+        containerColor = Color.White,
+        contentColor = VialertPurple,
+        indicator = { tabPositions ->
+            if (selectedIndex != -1 && selectedIndex < tabPositions.size) {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
+                    color = VialertPurple
+                )
+            }
+        }
     ) {
         tabs.forEach { status ->
-            val label = status?.let { 
-                when(it) {
-                    ReportStatus.PENDING -> "Pendiente"
-                    ReportStatus.IN_PROGRESS -> "Verificado"
-                    ReportStatus.RESOLVED -> "Resuelto"
-                }
-            } ?: "Todos"
+            val label = status?.displayName ?: "Todos"
             
             Tab(
                 selected = selectedStatus == status,
                 onClick = { onStatusSelected(status) },
-                text = { Text(text = label) }
+                text = { 
+                    Text(
+                        text = label,
+                        color = if (selectedStatus == status) VialertPurple else Color.Gray
+                    ) 
+                }
             )
         }
     }
@@ -143,114 +180,104 @@ private fun ReportsTabs(
 @Composable
 private fun ReportItemCard(
     report: Report,
-    date: String,
+    dateLabel: String,
     onViewDetails: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onMarkResolved: () -> Unit
 ) {
+    val isDeleted = report.status == ReportStatus.DELETED
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onViewDetails),
+            .clickable(enabled = !isDeleted, onClick = onViewDetails),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isDeleted) Color(0xFFF5F5F5) else MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isDeleted) 0.dp else 4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .graphicsLayer { alpha = if (isDeleted) 0.6f else 1.0f }
                 .padding(12.dp)
         ) {
+            // Imagen a la izquierda
             AsyncImage(
                 model = report.photoUrl,
                 contentDescription = report.title,
                 modifier = Modifier
-                    .size(width = 96.dp, height = 84.dp)
+                    .size(width = 110.dp, height = 120.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
+            // Columna de información a la derecha
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    StatusTag(status = report.status)
+                // 1. Estado del reporte
+                StatusCategoryChip(
+                    text = report.status.displayName,
+                    baseColor = report.status.color
+                )
 
-                    Row {
-                        IconButton(onClick = onEdit) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar"
-                            )
-                        }
-                        IconButton(onClick = onDelete) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Eliminar"
-                            )
-                        }
-                    }
-                }
-
+                // 2. Título
                 Text(
                     text = report.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = if (isDeleted) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
                 )
 
+                // 3. Categoría
+                val categoryEnum = ReportCategory.entries.find { it.displayName == report.type }
+                StatusCategoryChip(
+                    text = categoryEnum?.displayName ?: report.type,
+                    baseColor = if (isDeleted) Color.LightGray else (categoryEnum?.color ?: Color.Gray)
+                )
+
+                // 4. Fecha de creación
                 Text(
-                    text = "${report.type} · $date",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = dateLabel,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
+                // 5. Botón RESOLVER
                 if (report.status == ReportStatus.IN_PROGRESS) {
                     Button(
                         onClick = onMarkResolved,
-                        modifier = Modifier.align(Alignment.End)
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(text = "RESUELTO")
+                        Text(text = "RESOLVER")
                     }
                 }
 
-                if (report.status == ReportStatus.RESOLVED) {
-                    OutlinedButton(
-                        onClick = {},
-                        enabled = false,
-                        modifier = Modifier.align(Alignment.End)
+                // 6. Acciones
+                if (!isDeleted) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        Text(text = "RESUELTO")
+                        IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Edit, "Editar", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                        }
+                        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Delete, "Eliminar", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun StatusTag(status: ReportStatus) {
-    val (text, backgroundColor) = when (status) {
-        ReportStatus.PENDING -> "PENDIENTE" to Color(0xFFFFF3CD)
-        ReportStatus.IN_PROGRESS -> "VERIFICADO" to Color(0xFFE8E8FF)
-        ReportStatus.RESOLVED -> "RESUELTO" to Color(0xFFDFF6DD)
-    }
-
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    )
 }

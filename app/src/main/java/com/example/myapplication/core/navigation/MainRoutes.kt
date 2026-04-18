@@ -24,7 +24,10 @@ data object HomeUser : MainRoutes()
 data object Reports : MainRoutes()
 
 @Serializable
-data object ReportDetail : MainRoutes()
+data class NewReport(val reportId: String? = null) : MainRoutes()
+
+@Serializable
+data class ReportDetail(val reportId: String) : MainRoutes()
 
 @Serializable
 data object Explore : MainRoutes()

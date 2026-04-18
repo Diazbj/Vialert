@@ -12,6 +12,7 @@ import com.example.myapplication.features.profile.ProfileScreen
 import com.example.myapplication.features.newreport.NewReportScreen
 import com.example.myapplication.features.myreports.MyReportsScreen
 import com.example.myapplication.features.resetPassword.ResetPassword
+import com.example.myapplication.features.detailreport.DetailReportScreen
 
 @Composable
 fun MainNavigation(
@@ -33,8 +34,11 @@ fun MainNavigation(
         composable<Reports> {
             MyReportsScreen(navController = navController)
         }
-        composable<ReportDetail> {
+        composable<NewReport> {
             NewReportScreen(navController = navController)
+        }
+        composable<ReportDetail> {
+            DetailReportScreen(navController = navController)
         }
         composable<Explore> {
             ExploreScreen(navController = navController)

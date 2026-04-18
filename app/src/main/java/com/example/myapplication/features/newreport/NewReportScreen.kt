@@ -1,5 +1,6 @@
 package com.example.myapplication.features.newreport
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.core.components.ResultDialog
+import com.example.myapplication.core.theme.VialertPurple
 import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.features.homeuser.components.MainLayout
@@ -52,22 +54,26 @@ fun NewReportScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Crear Reporte",
+                text = if (uiState.isEditMode) "Editar Reporte" else "Crear Reporte",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = VialertPurple,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
-            // Título (Corresponde a title en Report)
+            // Título
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = viewModel::updateTitle,
                 label = { Text("Título del reporte") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VialertPurple,
+                    focusedLabelColor = VialertPurple
+                )
             )
 
-            // Categoría (Corresponde a type en Report)
+            // Categoría
             ExposedDropdownMenuBox(
                 expanded = isCategoryExpanded,
                 onExpandedChange = { isCategoryExpanded = !isCategoryExpanded }
@@ -82,12 +88,17 @@ fun NewReportScreen(
                     },
                     modifier = Modifier
                         .menuAnchor()
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = VialertPurple,
+                        focusedLabelColor = VialertPurple
+                    )
                 )
 
                 ExposedDropdownMenu(
                     expanded = isCategoryExpanded,
-                    onDismissRequest = { isCategoryExpanded = false }
+                    onDismissRequest = { isCategoryExpanded = false },
+                    containerColor = Color.White
                 ) {
                     ReportCategory.entries.forEach { category ->
                         DropdownMenuItem(
@@ -101,25 +112,31 @@ fun NewReportScreen(
                 }
             }
 
-            // Descripción (Corresponde a description en Report)
+            // Descripción
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = viewModel::updateDescription,
                 label = { Text("Descripción") },
                 minLines = 4,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VialertPurple,
+                    focusedLabelColor = VialertPurple
+                )
             )
 
-            // SECCIÓN UBICACIÓN (Implementación futura de location)
+            // SECCIÓN UBICACIÓN
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Ubicación (Próximamente)",
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = Color.DarkGray
                     )
 
                     Box(
@@ -127,30 +144,32 @@ fun NewReportScreen(
                             .fillMaxWidth()
                             .height(100.dp)
                             .background(
-                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                color = Color(0xFFF5F5F5),
                                 shape = RoundedCornerShape(10.dp)
                             ),
                         contentAlignment = androidx.compose.ui.Alignment.Center
                     ) {
                         Text(
                             text = "Mapa no disponible",
-                            color = MaterialTheme.colorScheme.outline,
+                            color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
             }
 
-            // SECCIÓN FOTOS (Implementación futura de photoUrl)
+            // SECCIÓN FOTOS
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Fotos (Próximamente)",
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = Color.DarkGray
                     )
                     
                     Text(
@@ -163,24 +182,43 @@ fun NewReportScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón Publicar
+            // Botón Acción
             Button(
-                onClick = viewModel::createReport,
+                onClick = viewModel::onSubmit,
                 enabled = uiState.isFormValid && submitResult !is RequestResult.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = VialertPurple,
+                    contentColor = Color.White
+                )
             ) {
                 if (submitResult is RequestResult.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.White
                     )
                 } else {
-                    Text("PUBLICAR REPORTE")
+                    Text(if (uiState.isEditMode) "ACTUALIZAR REPORTE" else "PUBLICAR REPORTE")
                 }
+            }
+
+            // Botón Cancelar
+            OutlinedButton(
+                onClick = { navController?.popBackStack() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = VialertPurple
+                ),
+                border = BorderStroke(1.dp, VialertPurple)
+            ) {
+                Text("CANCELAR")
             }
         }
     }

@@ -8,15 +8,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ChatBubble
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.core.theme.VialertPurple
 import com.example.myapplication.domain.model.TipoNotificacion
 import com.example.myapplication.features.homeuser.components.MainLayout
 import java.time.Duration
@@ -61,7 +64,10 @@ fun NotificationsScreen(
                 )
 
                 TextButton(onClick = viewModel::markAllAsRead) {
-                    Text(text = stringResource(id = R.string.notifications_mark_all))
+                    Text(
+                        text = stringResource(id = R.string.notifications_mark_all),
+                        color = VialertPurple
+                    )
                 }
             }
 
@@ -70,7 +76,7 @@ fun NotificationsScreen(
             when (uiState.contentState) {
                 NotificationsUiContentState.LOADING -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = VialertPurple)
                     }
                 }
 
@@ -112,16 +118,33 @@ private fun NotificationsTabs(
         NotificationFilter.TODAS to stringResource(id = R.string.notifications_filter_all),
         NotificationFilter.NO_LEIDAS to stringResource(id = R.string.notifications_filter_unread)
     )
+    val selectedIndex = tabs.indexOfFirst { it.first == selectedFilter }
 
     TabRow(
-        selectedTabIndex = tabs.indexOfFirst { it.first == selectedFilter },
-        modifier = modifier
+        selectedTabIndex = selectedIndex.coerceAtLeast(0),
+        modifier = modifier,
+        containerColor = Color.White,
+        contentColor = VialertPurple,
+        divider = {},
+        indicator = { tabPositions ->
+            if (selectedIndex != -1) {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
+                    color = VialertPurple
+                )
+            }
+        }
     ) {
         tabs.forEach { (filter, label) ->
             Tab(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                text = { Text(text = label) }
+                text = { 
+                    Text(
+                        text = label,
+                        color = if (selectedFilter == filter) VialertPurple else Color.Gray
+                    ) 
+                }
             )
         }
     }
@@ -142,11 +165,12 @@ private fun NotificationItem(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (item.leido) {
-                MaterialTheme.colorScheme.surface
+                Color.White
             } else {
-                MaterialTheme.colorScheme.surfaceVariant
+                Color(0xFF6A1B9A).copy(alpha = 0.05f)
             }
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (item.leido) 1.dp else 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -156,14 +180,15 @@ private fun NotificationItem(
         ) {
             Surface(
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = VialertPurple.copy(alpha = 0.1f),
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = VialertPurple,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -174,13 +199,13 @@ private fun NotificationItem(
                 Text(
                     text = item.notification.titulo,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.DarkGray
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = item.notification.mensaje,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray
                 )
             }
 
@@ -190,7 +215,7 @@ private fun NotificationItem(
                 Text(
                     text = relativeTime,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = Color.LightGray
                 )
                 if (!item.leido) {
                     Spacer(modifier = Modifier.height(6.dp))
@@ -198,7 +223,7 @@ private fun NotificationItem(
                         modifier = Modifier
                             .size(8.dp)
                             .background(
-                                color = Color(0xFF6A1B9A),
+                                color = VialertPurple,
                                 shape = CircleShape
                             )
                     )
@@ -210,11 +235,11 @@ private fun NotificationItem(
 
 private fun iconForType(tipo: TipoNotificacion): ImageVector {
     return when (tipo) {
-        TipoNotificacion.REPORTE_CREADO -> Icons.Default.Campaign
-        TipoNotificacion.REPORTE_ACTUALIZADO -> Icons.Default.Update
-        TipoNotificacion.REPORTE_COMENTARIO -> Icons.Default.ChatBubble
-        TipoNotificacion.REPORTE_REACCION -> Icons.Default.Favorite
-        TipoNotificacion.REPORTE_CERRADO -> Icons.Default.CheckCircle
+        TipoNotificacion.REPORTE_CREADO -> Icons.Outlined.Campaign
+        TipoNotificacion.REPORTE_ACTUALIZADO -> Icons.Outlined.Update
+        TipoNotificacion.REPORTE_COMENTARIO -> Icons.Outlined.ChatBubble
+        TipoNotificacion.REPORTE_REACCION -> Icons.Outlined.Favorite
+        TipoNotificacion.REPORTE_CERRADO -> Icons.Outlined.CheckCircle
     }
 }
 

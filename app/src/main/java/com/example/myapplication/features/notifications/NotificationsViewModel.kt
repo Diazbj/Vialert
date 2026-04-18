@@ -124,7 +124,6 @@ class NotificationsViewModel @Inject constructor(
             NotificationFilter.TODAS -> source
             NotificationFilter.NO_LEIDAS -> source.filter { !it.leido }
         }
-
         _uiState.update {
             it.copy(
                 selectedFilter = filter,

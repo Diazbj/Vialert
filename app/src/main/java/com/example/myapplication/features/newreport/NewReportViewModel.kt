@@ -1,7 +1,10 @@
 package com.example.myapplication.features.newreport
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.example.myapplication.core.navigation.NewReport
 import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.data.datastore.SessionDataStore
 import com.example.myapplication.domain.model.Location
@@ -20,28 +23,60 @@ import java.util.UUID
 import javax.inject.Inject
 
 data class NewReportUiState(
+    val reportId: String? = null,
     val title: String = "",
     val category: ReportCategory? = null,
     val description: String = "",
     val location: Location? = null,
     val address: String = "Ubicación no seleccionada",
-    val images: List<String> = emptyList()
+    val images: List<String> = emptyList(),
+    val status: ReportStatus = ReportStatus.PENDING
 ) {
     val isFormValid: Boolean
         get() = title.isNotBlank() && category != null && description.isNotBlank()
+    val isEditMode: Boolean
+        get() = reportId != null
 }
 
 @HiltViewModel
 class NewReportViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
-    private val sessionDataStore: SessionDataStore
+    private val sessionDataStore: SessionDataStore,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(NewReportUiState())
+    private val route = savedStateHandle.toRoute<NewReport>()
+    
+    private val _uiState = MutableStateFlow(NewReportUiState(reportId = route.reportId))
     val uiState: StateFlow<NewReportUiState> = _uiState.asStateFlow()
 
     private val _submitResult = MutableStateFlow<RequestResult?>(null)
     val submitResult: StateFlow<RequestResult?> = _submitResult.asStateFlow()
+
+    init {
+        checkIfEditMode()
+    }
+
+    private fun checkIfEditMode() {
+        val id = _uiState.value.reportId
+        if (id != null) {
+            viewModelScope.launch {
+                val report = reportRepository.getById(id)
+                if (report != null) {
+                    val category = ReportCategory.entries.find { it.displayName == report.type }
+                    _uiState.update { 
+                        it.copy(
+                            title = report.title,
+                            category = category,
+                            description = report.description,
+                            location = report.location,
+                            status = report.status
+                        ) 
+                    }
+                }
+            }
+        }
+    }
 
     fun updateTitle(value: String) {
         _uiState.update { it.copy(title = value) }
@@ -55,28 +90,7 @@ class NewReportViewModel @Inject constructor(
         _uiState.update { it.copy(description = value) }
     }
 
-    fun updateLocation(location: Location, address: String) {
-        _uiState.update {
-            it.copy(
-                location = location,
-                address = address
-            )
-        }
-    }
-
-    fun addImage(image: String) {
-        _uiState.update { state ->
-            state.copy(images = state.images + image)
-        }
-    }
-
-    fun removeImage(image: String) {
-        _uiState.update { state ->
-            state.copy(images = state.images.filterNot { it == image })
-        }
-    }
-
-    fun createReport() {
+    fun onSubmit() {
         val current = _uiState.value
         if (!current.isFormValid) {
             _submitResult.value = RequestResult.Failure("Completa todos los campos obligatorios")
@@ -90,23 +104,33 @@ class NewReportViewModel @Inject constructor(
                 val session = sessionDataStore.sessionFlow.firstOrNull()
                 val ownerId = session?.userId ?: "anonymous"
 
-                val newReport = Report(
-                    id = UUID.randomUUID().toString(),
-                    title = current.title,
-                    description = current.description,
-                    // Implementación futura de location
-                    location = current.location ?: Location(0.0, 0.0),
-                    status = ReportStatus.PENDING,
-                    type = current.category?.displayName ?: "Otros",
-                    // Implementación futura de photoUrl
-                    photoUrl = if (current.images.isNotEmpty()) current.images.first() else "",
-                    ownerId = ownerId
-                )
-
-                reportRepository.create(newReport)
-                _submitResult.value = RequestResult.Success("Reporte publicado exitosamente")
+                if (current.isEditMode) {
+                    val existingReport = reportRepository.getById(current.reportId!!)
+                    if (existingReport != null) {
+                        val updatedReport = existingReport.copy(
+                            title = current.title,
+                            description = current.description,
+                            type = current.category?.displayName ?: existingReport.type
+                        )
+                        reportRepository.update(updatedReport)
+                        _submitResult.value = RequestResult.Success("Reporte actualizado exitosamente")
+                    }
+                } else {
+                    val newReport = Report(
+                        id = UUID.randomUUID().toString(),
+                        title = current.title,
+                        description = current.description,
+                        location = current.location ?: Location(0.0, 0.0),
+                        status = ReportStatus.PENDING,
+                        type = current.category?.displayName ?: "Otros",
+                        photoUrl = "",
+                        ownerId = ownerId
+                    )
+                    reportRepository.create(newReport)
+                    _submitResult.value = RequestResult.Success("Reporte publicado exitosamente")
+                }
             } catch (e: Exception) {
-                _submitResult.value = RequestResult.Failure(e.message ?: "Error al publicar el reporte")
+                _submitResult.value = RequestResult.Failure(e.message ?: "Error al procesar el reporte")
             }
         }
     }

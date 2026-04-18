@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.core.navigation.ReportDetail
 import com.example.myapplication.features.homeuser.components.MainLayout
 import com.example.myapplication.features.homeuser.components.ReportList
 
@@ -35,7 +36,10 @@ fun HomeUserScreen(
                 onImportantClick = { reportId ->
                     viewModel.onImportantClick(reportId)
                 },
-                onShareClick = {}
+                onShareClick = {},
+                onReportClick = { report ->
+                    navController?.navigate(ReportDetail(reportId = report.id))
+                }
             )
         }
     }

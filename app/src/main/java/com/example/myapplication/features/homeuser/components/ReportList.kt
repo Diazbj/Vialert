@@ -1,5 +1,6 @@
 package com.example.myapplication.features.homeuser.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ fun ReportList(
     reportTimes: Map<String, String>,
     onImportantClick: (String) -> Unit,
     onShareClick: (Report) -> Unit,
+    onReportClick: (Report) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -32,7 +34,8 @@ fun ReportList(
                 onImportantClick = { reportToIncrement -> 
                     onImportantClick(reportToIncrement.id) 
                 },
-                onShareClick = onShareClick
+                onShareClick = onShareClick,
+                modifier = Modifier.clickable { onReportClick(report) }
             )
         }
     }
