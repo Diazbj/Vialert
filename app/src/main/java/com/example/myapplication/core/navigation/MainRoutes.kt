@@ -38,4 +38,19 @@ data object Profile : MainRoutes()
 @Serializable
 data object Notifications : MainRoutes()
 
+@Serializable
+data object EditProfile : MainRoutes()
+
+@Serializable
+data object Statistics : MainRoutes()
+
+@Serializable
+data object AdminControlPanel : MainRoutes()
+
+@Serializable
+data object AdminDataAnalysis : MainRoutes()
+
+@Serializable
+data object AdminReportModeration : MainRoutes()
+
 sealed class MainRoutes

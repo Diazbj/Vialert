@@ -17,10 +17,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.example.myapplication.R
 import com.example.myapplication.core.components.StatusCategoryChip
 import com.example.myapplication.core.navigation.ReportDetail
 import com.example.myapplication.core.navigation.NewReport
@@ -41,19 +43,19 @@ fun MyReportsScreen(
     if (uiState.reportToDelete != null) {
         AlertDialog(
             onDismissRequest = viewModel::hideDeleteConfirmation,
-            title = { Text("Eliminar Reporte") },
-            text = { Text("¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(R.string.my_reports_delete_dialog_title)) },
+            text = { Text(stringResource(R.string.my_reports_delete_dialog_text)) },
             confirmButton = {
                 TextButton(
                     onClick = viewModel::deleteReport,
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
                 ) {
-                    Text("Eliminar")
+                    Text(stringResource(R.string.my_reports_delete_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::hideDeleteConfirmation) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.my_reports_cancel))
                 }
             }
         )
@@ -71,7 +73,7 @@ fun MyReportsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Mis Reportes",
+                text = stringResource(R.string.my_reports_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = VialertPurple,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -100,7 +102,7 @@ fun MyReportsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No hay reportes para mostrar",
+                            text = stringResource(R.string.my_reports_empty),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -161,7 +163,7 @@ private fun ReportsTabs(
         }
     ) {
         tabs.forEach { status ->
-            val label = status?.displayName ?: "Todos"
+            val label = status?.displayName ?: stringResource(R.string.my_reports_tab_all)
             
             Tab(
                 selected = selectedStatus == status,
@@ -259,7 +261,7 @@ private fun ReportItemCard(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(text = "RESOLVER")
+                        Text(text = stringResource(R.string.my_reports_btn_resolve))
                     }
                 }
 
@@ -270,10 +272,10 @@ private fun ReportItemCard(
                         horizontalArrangement = Arrangement.End
                     ) {
                         IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Edit, "Editar", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Edit, stringResource(R.string.my_reports_icon_edit), tint = Color.Gray, modifier = Modifier.size(18.dp))
                         }
                         IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Delete, "Eliminar", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Delete, stringResource(R.string.my_reports_icon_delete), tint = Color.Gray, modifier = Modifier.size(18.dp))
                         }
                     }
                 }

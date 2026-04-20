@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import com.example.myapplication.domain.repository.UserRepository
 
 data class NewReportUiState(
     val reportId: String? = null,
@@ -41,6 +42,7 @@ data class NewReportUiState(
 @HiltViewModel
 class NewReportViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
+    private val userRepository: UserRepository,
     private val sessionDataStore: SessionDataStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -127,7 +129,16 @@ class NewReportViewModel @Inject constructor(
                         ownerId = ownerId
                     )
                     reportRepository.create(newReport)
-                    _submitResult.value = RequestResult.Success("Reporte publicado exitosamente")
+                    
+                    // Gamificación: +10 puntos por crear reporte
+                    if (ownerId != "anonymous") {
+                        val user = userRepository.getById(ownerId)
+                        if (user != null) {
+                            userRepository.update(user.copy(score = user.score + 10))
+                        }
+                    }
+                    
+                    _submitResult.value = RequestResult.Success("Reporte publicado exitosamente (\u002B10 pts)")
                 }
             } catch (e: Exception) {
                 _submitResult.value = RequestResult.Failure(e.message ?: "Error al procesar el reporte")

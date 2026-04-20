@@ -11,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.core.components.ResultDialog
 import com.example.myapplication.core.theme.VialertPurple
 import com.example.myapplication.core.utils.RequestResult
@@ -54,7 +56,7 @@ fun NewReportScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = if (uiState.isEditMode) "Editar Reporte" else "Crear Reporte",
+                text = if (uiState.isEditMode) stringResource(R.string.new_report_title_edit) else stringResource(R.string.new_report_title_create),
                 style = MaterialTheme.typography.headlineSmall,
                 color = VialertPurple,
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -64,7 +66,7 @@ fun NewReportScreen(
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = viewModel::updateTitle,
-                label = { Text("Título del reporte") },
+                label = { Text(stringResource(R.string.new_report_label_title)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -82,7 +84,7 @@ fun NewReportScreen(
                     value = uiState.category?.displayName ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Categoría") },
+                    label = { Text(stringResource(R.string.new_report_label_category)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryExpanded)
                     },
@@ -116,7 +118,7 @@ fun NewReportScreen(
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = viewModel::updateDescription,
-                label = { Text("Descripción") },
+                label = { Text(stringResource(R.string.new_report_label_description)) },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -134,7 +136,7 @@ fun NewReportScreen(
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Ubicación (Próximamente)",
+                        text = stringResource(R.string.new_report_location_title),
                         style = MaterialTheme.typography.titleSmall,
                         color = Color.DarkGray
                     )
@@ -150,7 +152,7 @@ fun NewReportScreen(
                         contentAlignment = androidx.compose.ui.Alignment.Center
                     ) {
                         Text(
-                            text = "Mapa no disponible",
+                            text = stringResource(R.string.new_report_map_unavailable),
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -167,13 +169,13 @@ fun NewReportScreen(
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Fotos (Próximamente)",
+                        text = stringResource(R.string.new_report_photos_title),
                         style = MaterialTheme.typography.titleSmall,
                         color = Color.DarkGray
                     )
                     
                     Text(
-                        text = "La carga de imágenes será habilitada en futuras versiones.",
+                        text = stringResource(R.string.new_report_photos_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
@@ -202,7 +204,7 @@ fun NewReportScreen(
                         color = Color.White
                     )
                 } else {
-                    Text(if (uiState.isEditMode) "ACTUALIZAR REPORTE" else "PUBLICAR REPORTE")
+                    Text(if (uiState.isEditMode) stringResource(R.string.new_report_btn_update) else stringResource(R.string.new_report_btn_publish))
                 }
             }
 
@@ -218,7 +220,7 @@ fun NewReportScreen(
                 ),
                 border = BorderStroke(1.dp, VialertPurple)
             ) {
-                Text("CANCELAR")
+                Text(stringResource(R.string.new_report_btn_cancel))
             }
         }
     }

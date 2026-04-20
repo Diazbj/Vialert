@@ -17,12 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.example.myapplication.R
 import com.example.myapplication.core.components.StatusCategoryChip
 import com.example.myapplication.domain.model.Comment
 import com.example.myapplication.domain.model.Report
@@ -41,10 +43,10 @@ fun DetailReportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle del Reporte", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.detail_report_topbar_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.detail_report_back))
                     }
                 }
             )
@@ -82,7 +84,7 @@ fun DetailReportScreen(
                     
                     item {
                         Text(
-                            text = "Comentarios (${uiState.comments.size})",
+                            text = stringResource(R.string.detail_report_comments_title, uiState.comments.size),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -91,7 +93,7 @@ fun DetailReportScreen(
                     items(uiState.comments) { comment ->
                         CommentItem(
                             comment = comment, 
-                            userName = uiState.userNames[comment.userId] ?: "Usuario ${comment.userId}"
+                            userName = uiState.userNames[comment.userId] ?: stringResource(R.string.detail_report_user_prefix, comment.userId)
                         )
                     }
                     
@@ -177,7 +179,7 @@ fun ImportanceSection(count: Int) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "¡Es Importante!",
+                text = stringResource(R.string.detail_report_is_important),
                 color = Color(0xFF6A1B9A),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyLarge
@@ -202,7 +204,7 @@ fun ImportanceSection(count: Int) {
 fun LocationSection() {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Ubicación",
+            text = stringResource(R.string.detail_report_location_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -216,7 +218,7 @@ fun LocationSection() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Mapa disponible en futuras actualizaciones",
+                text = stringResource(R.string.detail_report_map_coming_soon),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -299,7 +301,7 @@ fun CommentInput(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "YO",
+                    text = stringResource(R.string.detail_report_me_avatar),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
@@ -309,7 +311,7 @@ fun CommentInput(
             OutlinedTextField(
                 value = text,
                 onValueChange = onTextChanged,
-                placeholder = { Text("Escribe un comentario ...") },
+                placeholder = { Text(stringResource(R.string.detail_report_comment_placeholder)) },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 3,
@@ -320,7 +322,7 @@ fun CommentInput(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Enviar",
+                            contentDescription = stringResource(R.string.detail_report_send),
                             tint = if (text.isNotBlank()) Color(0xFF6A1B9A) else Color.Gray
                         )
                     }

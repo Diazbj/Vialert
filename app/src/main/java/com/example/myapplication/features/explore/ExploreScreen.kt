@@ -7,9 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.features.homeuser.components.MainLayout
 
 @Composable
@@ -26,7 +28,7 @@ fun ExploreScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Explorar",
+                text = stringResource(R.string.explore_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -37,7 +39,7 @@ fun ExploreScreen(
             OutlinedTextField(
                 value = viewModel.searchQuery.value,
                 onValueChange = { viewModel.onSearchQueryChange(it) },
-                label = { Text("Buscar incidente o zona") },
+                label = { Text(stringResource(R.string.explore_search_label)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -49,7 +51,7 @@ fun ExploreScreen(
                 onClick = { viewModel.onSearch() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Buscar")
+                Text(stringResource(R.string.explore_btn_search))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -64,7 +66,7 @@ fun ExploreScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "El mapa estará disponible próximamente",
+                        text = stringResource(R.string.explore_map_coming_soon),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.outline
                     )

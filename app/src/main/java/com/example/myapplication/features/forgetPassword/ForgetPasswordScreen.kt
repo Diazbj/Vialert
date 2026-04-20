@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,13 +64,13 @@ fun ForgetPasswordScreen(
                 .size(200.dp)
                 .align(Alignment.CenterHorizontally),
             painter = painterResource(id = R.drawable.forgetpassword),
-            contentDescription = "Logo",
+            contentDescription = stringResource(R.string.forget_password_image_description),
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "¿Olvidaste tu contraseña?",
+            text = stringResource(R.string.forget_password_title),
             style = MaterialTheme.typography.headlineLarge,
             color = Color(0xFF6A1B9A),
             fontSize = 48.sp
@@ -78,7 +79,7 @@ fun ForgetPasswordScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "No te preocupes, introduce tu correo electrónico y te enviaremos un enlace para restablecerla",
+            text = stringResource(R.string.forget_password_subtitle),
             fontSize = 16.sp,
             color = Color.Gray
         )
@@ -88,8 +89,8 @@ fun ForgetPasswordScreen(
         VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = "Correo electrónico",
-            placeholder = "correo@ejemplo.com",
+            label = stringResource(R.string.forget_password_label_email),
+            placeholder = stringResource(R.string.forget_password_placeholder_email),
             isError = viewModel.email.error != null,
             supportingText = viewModel.email.error
         )
@@ -117,7 +118,7 @@ fun ForgetPasswordScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text(text = "Enviar enlace")
+                Text(text = stringResource(R.string.forget_password_btn_send))
             }
         }
 
@@ -131,7 +132,7 @@ fun ForgetPasswordScreen(
             shape = RoundedCornerShape(30),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6A1B9A))
         ) {
-            Text(text = "Volver al Inicio de Sesión")
+            Text(text = stringResource(R.string.forget_password_btn_back))
         }
 
     }

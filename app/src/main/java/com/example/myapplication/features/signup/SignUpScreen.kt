@@ -10,11 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.core.components.ResultDialog
 import com.example.myapplication.core.components.VialertPasswordField
 import com.example.myapplication.core.components.VialertTextField
@@ -55,7 +56,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Crea tu cuenta",
+            text = stringResource(R.string.signup_title),
             style = MaterialTheme.typography.headlineLarge,
             color = Color(0xFF6A1B9A),
             fontSize = 48.sp
@@ -64,7 +65,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Únete a la comunidad de vigilancia ciudadana y haz tu barrio un lugar más seguro",
+            text = stringResource(R.string.signup_subtitle),
             fontSize = 16.sp,
             color = Color.Gray
         )
@@ -78,8 +79,8 @@ fun SignUpScreen(
             VialertTextField(
                 value = viewModel.firstName.value,
                 onValueChange = { viewModel.firstName.onChange(it) },
-                label = "Nombre",
-                placeholder = "Ej: Juan",
+                label = stringResource(R.string.signup_label_first_name),
+                placeholder = stringResource(R.string.signup_placeholder_first_name),
                 isError = viewModel.firstName.error != null,
                 supportingText = viewModel.firstName.error,
                 modifier = Modifier.weight(1f)
@@ -87,8 +88,8 @@ fun SignUpScreen(
             VialertTextField(
                 value = viewModel.lastName.value,
                 onValueChange = { viewModel.lastName.onChange(it) },
-                label = "Apellido",
-                placeholder = "Ej: Pérez",
+                label = stringResource(R.string.signup_label_last_name),
+                placeholder = stringResource(R.string.signup_placeholder_last_name),
                 isError = viewModel.lastName.error != null,
                 supportingText = viewModel.lastName.error,
                 modifier = Modifier.weight(1f)
@@ -100,8 +101,8 @@ fun SignUpScreen(
         VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = "Correo electrónico",
-            placeholder = "correo@ejemplo.com",
+            label = stringResource(R.string.signup_label_email),
+            placeholder = stringResource(R.string.signup_placeholder_email),
             isError = viewModel.email.error != null,
             supportingText = viewModel.email.error
         )
@@ -111,8 +112,8 @@ fun SignUpScreen(
         VialertTextField(
             value = viewModel.userName.value,
             onValueChange = { viewModel.userName.onChange(it) },
-            label = "Nombre de usuario",
-            placeholder = "@usuario123",
+            label = stringResource(R.string.signup_label_username),
+            placeholder = stringResource(R.string.signup_placeholder_username),
             isError = viewModel.userName.error != null,
             supportingText = viewModel.userName.error
         )
@@ -144,7 +145,7 @@ fun SignUpScreen(
                 }
             }
             Text(
-                text = "Seguridad: ${viewModel.passwordStrengthText.value}",
+                text = stringResource(R.string.signup_password_strength, viewModel.passwordStrengthText.value),
                 fontSize = 12.sp,
                 color = if (viewModel.passwordStrengthLevel.value == 0) Color.Gray else Color(0xFF6A1B9A),
                 modifier = Modifier.padding(top = 4.dp)
@@ -168,7 +169,7 @@ fun SignUpScreen(
                     } ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = "Género",
+                    label = stringResource(R.string.signup_label_gender),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isGenderMenuExpanded) },
                     isError = viewModel.gender.error != null,
                     supportingText = viewModel.gender.error,
@@ -195,8 +196,8 @@ fun SignUpScreen(
             VialertTextField(
                 value = viewModel.birthDate.value,
                 onValueChange = { viewModel.birthDate.onChange(it) },
-                label = "F. Nacimiento",
-                placeholder = "DD/MM/AAAA",
+                label = stringResource(R.string.signup_label_birth_date),
+                placeholder = stringResource(R.string.signup_placeholder_birth_date),
                 isError = viewModel.birthDate.error != null,
                 supportingText = viewModel.birthDate.error,
                 modifier = Modifier.weight(1f)
@@ -215,7 +216,7 @@ fun SignUpScreen(
                 onCheckedChange = { viewModel.onTermsAcceptanceChange(it) }
             )
             Text(
-                text = "Acepto los términos y condiciones y la politica de privacidad de Vialert",
+                text = stringResource(R.string.signup_terms),
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -243,7 +244,7 @@ fun SignUpScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text(text = "Crear Cuenta")
+                Text(text = stringResource(R.string.signup_btn_create))
             }
         }
 
@@ -257,7 +258,7 @@ fun SignUpScreen(
             shape = RoundedCornerShape(30),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6A1B9A))
         ) {
-            Text(text = "Volver")
+            Text(text = stringResource(R.string.signup_btn_back))
         }
 
         Spacer(modifier = Modifier.height(15.dp))

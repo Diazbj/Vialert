@@ -11,6 +11,11 @@ import com.example.myapplication.features.notifications.NotificationsScreen
 import com.example.myapplication.features.profile.ProfileScreen
 import com.example.myapplication.features.newreport.NewReportScreen
 import com.example.myapplication.features.myreports.MyReportsScreen
+import com.example.myapplication.features.profile.EditProfileScreen
+import com.example.myapplication.features.statistics.StatisticsScreen
+import com.example.myapplication.features.admin.AdminControlPanelScreen
+import com.example.myapplication.features.admin.AdminDataAnalysisScreen
+import com.example.myapplication.features.admin.AdminReportModerationScreen
 import com.example.myapplication.features.resetPassword.ResetPassword
 import com.example.myapplication.features.detailreport.DetailReportScreen
 
@@ -48,6 +53,21 @@ fun MainNavigation(
         }
         composable<Notifications> {
             NotificationsScreen(navController = navController)
+        }
+        composable<EditProfile> {
+            EditProfileScreen(navController = navController)
+        }
+        composable<Statistics> {
+            StatisticsScreen(navController = navController)
+        }
+        composable<AdminControlPanel> {
+            AdminControlPanelScreen(navController = navController)
+        }
+        composable<AdminDataAnalysis> {
+            AdminDataAnalysisScreen(navController = navController)
+        }
+        composable<AdminReportModeration> {
+            AdminReportModerationScreen(navController = navController)
         }
     }
 }

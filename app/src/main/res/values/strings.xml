@@ -1,5 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Vialert</string>
+
+    <!-- ===== HOME SCREEN (Pantalla de inicio) ===== -->
+    <string name="home_logo_description">Logo</string>
+    <string name="home_tagline">Reporta problemas viales en tiempo real y construye una ciudad más segura para todos</string>
+    <string name="home_btn_register">Registrarme</string>
+    <string name="home_btn_login">Iniciar Sesión</string>
+    <string name="home_footer">VIGILANCIA CIUDADANA INTELIGENTE.</string>
+
+    <!-- ===== HOME USER (Pantalla principal del usuario) ===== -->
     <string name="home_user_topbar_title">Vialert</string>
     <string name="home_user_notifications_content_description">Notificaciones</string>
     <string name="home_user_support_content_description">Soporte</string>
@@ -13,6 +23,53 @@
     <string name="home_user_nav_explore">Explorar</string>
     <string name="home_user_nav_profile">Perfil</string>
     <string name="home_user_create_report">Crear reporte</string>
+
+    <!-- ===== LOGIN SCREEN ===== -->
+    <string name="login_title">Bienvenido de nuevo</string>
+    <string name="login_subtitle">Tu seguridad y la de tu comunidad es nuestra prioridad</string>
+    <string name="login_label_email">Correo electrónico</string>
+    <string name="login_placeholder_email">correo@ejemplo.com</string>
+    <string name="login_forgot_password">Olvide mi contraseña</string>
+    <string name="login_btn_login">Iniciar Sesión</string>
+    <string name="login_btn_back">Volver</string>
+    <string name="login_no_account">¿No tienes cuenta? Regístrate</string>
+
+    <!-- ===== SIGN UP SCREEN ===== -->
+    <string name="signup_title">Crea tu cuenta</string>
+    <string name="signup_subtitle">Únete a la comunidad de vigilancia ciudadana y haz tu barrio un lugar más seguro</string>
+    <string name="signup_label_first_name">Nombre</string>
+    <string name="signup_placeholder_first_name">Ej: Juan</string>
+    <string name="signup_label_last_name">Apellido</string>
+    <string name="signup_placeholder_last_name">Ej: Pérez</string>
+    <string name="signup_label_email">Correo electrónico</string>
+    <string name="signup_placeholder_email">correo@ejemplo.com</string>
+    <string name="signup_label_username">Nombre de usuario</string>
+    <string name="signup_placeholder_username">@usuario123</string>
+    <string name="signup_label_gender">Género</string>
+    <string name="signup_label_birth_date">F. Nacimiento</string>
+    <string name="signup_placeholder_birth_date">DD/MM/AAAA</string>
+    <string name="signup_password_strength">Seguridad: %1$s</string>
+    <string name="signup_terms">Acepto los términos y condiciones y la politica de privacidad de Vialert</string>
+    <string name="signup_btn_create">Crear Cuenta</string>
+    <string name="signup_btn_back">Volver</string>
+
+    <!-- ===== FORGET PASSWORD SCREEN ===== -->
+    <string name="forget_password_image_description">Logo</string>
+    <string name="forget_password_title">¿Olvidaste tu contraseña?</string>
+    <string name="forget_password_subtitle">No te preocupes, introduce tu correo electrónico y te enviaremos un enlace para restablecerla</string>
+    <string name="forget_password_label_email">Correo electrónico</string>
+    <string name="forget_password_placeholder_email">correo@ejemplo.com</string>
+    <string name="forget_password_btn_send">Enviar enlace</string>
+    <string name="forget_password_btn_back">Volver al Inicio de Sesión</string>
+
+    <!-- ===== RESET PASSWORD SCREEN ===== -->
+    <string name="reset_password_title">Actualice su contraseña</string>
+    <string name="reset_password_label_new">Ingrese su nueva contraseña</string>
+    <string name="reset_password_label_confirm">Verifique su contraseña</string>
+    <string name="reset_password_btn_update">Actualizar contraseña</string>
+    <string name="reset_password_toast_updated">Contraseña Actualizada</string>
+
+    <!-- ===== NOTIFICATIONS SCREEN ===== -->
     <string name="notifications_topbar_title">Notificaciones</string>
     <string name="notifications_mark_all">Marcar todas</string>
     <string name="notifications_empty">No hay notificaciones</string>
@@ -22,4 +79,181 @@
     <string name="notifications_minutes_ago">Hace %1$d min</string>
     <string name="notifications_hours_ago">Hace %1$d hora</string>
     <string name="notifications_yesterday">Ayer</string>
+
+    <!-- ===== EXPLORE SCREEN ===== -->
+    <string name="explore_title">Explorar</string>
+    <string name="explore_search_label">Buscar incidente o zona</string>
+    <string name="explore_btn_search">Buscar</string>
+    <string name="explore_map_coming_soon">El mapa estará disponible próximamente</string>
+
+    <!-- ===== MY REPORTS SCREEN ===== -->
+    <string name="my_reports_title">Mis Reportes</string>
+    <string name="my_reports_tab_all">Todos</string>
+    <string name="my_reports_empty">No hay reportes para mostrar</string>
+    <string name="my_reports_delete_dialog_title">Eliminar Reporte</string>
+    <string name="my_reports_delete_dialog_text">¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.</string>
+    <string name="my_reports_delete_confirm">Eliminar</string>
+    <string name="my_reports_cancel">Cancelar</string>
+    <string name="my_reports_btn_resolve">RESOLVER</string>
+    <string name="my_reports_icon_edit">Editar</string>
+    <string name="my_reports_icon_delete">Eliminar</string>
+
+    <!-- ===== NEW REPORT SCREEN ===== -->
+    <string name="new_report_title_create">Crear Reporte</string>
+    <string name="new_report_title_edit">Editar Reporte</string>
+    <string name="new_report_label_title">Título del reporte</string>
+    <string name="new_report_label_category">Categoría</string>
+    <string name="new_report_label_description">Descripción</string>
+    <string name="new_report_location_title">Ubicación (Próximamente)</string>
+    <string name="new_report_map_unavailable">Mapa no disponible</string>
+    <string name="new_report_photos_title">Fotos (Próximamente)</string>
+    <string name="new_report_photos_description">La carga de imágenes será habilitada en futuras versiones.</string>
+    <string name="new_report_btn_publish">PUBLICAR REPORTE</string>
+    <string name="new_report_btn_update">ACTUALIZAR REPORTE</string>
+    <string name="new_report_btn_cancel">CANCELAR</string>
+
+    <!-- ===== PROFILE SCREEN ===== -->
+    <string name="profile_score">Score: %1$d pts</string>
+    <string name="profile_loading_name">Cargando...</string>
+    <string name="profile_btn_edit">Editar Perfil</string>
+    <string name="profile_btn_logout">Cerrar Sesión</string>
+    <string name="profile_stats_pending">PENDIENTES</string>
+    <string name="profile_stats_verified">VERIFICADOS</string>
+    <string name="profile_stats_resolved">RESUELTOS</string>
+    <string name="profile_reputation_title">Progreso de Reputación</string>
+    <string name="profile_reputation_next_level">Te faltan %1$d pts para subir al nivel %2$s</string>
+    <string name="profile_reputation_max">Máximo</string>
+    <string name="profile_tab_achievements">Logros</string>
+    <string name="profile_tab_publications">Mis Publicaciones</string>
+    <string name="profile_no_publications">No hay publicaciones aún</string>
+    <!-- Admin Profile -->
+    <string name="profile_admin_back">Volver</string>
+    <string name="profile_admin_title">Mi Perfil</string>
+    <string name="profile_admin_settings">Configuración</string>
+    <string name="profile_admin_role">Administrador Senior</string>
+    <string name="profile_admin_region">Región Metropolitana • ID: #%1$s</string>
+    <string name="profile_admin_control_panel">Panel de Control Admin</string>
+    <string name="profile_admin_stat_reports">REPORTES</string>
+    <string name="profile_admin_stat_users">USUARIOS</string>
+    <string name="profile_admin_stat_alerts">ALERTAS</string>
+    <string name="profile_admin_resolution_title">Resolución de Incidentes</string>
+    <string name="profile_admin_performance">Rendimiento óptimo esta semana</string>
+    <string name="profile_admin_tab_activity">Actividad</string>
+    <string name="profile_admin_tab_new_users">Usuarios Nuevos</string>
+    <string name="profile_admin_role_moderator">Moderador</string>
+    <string name="profile_admin_role_verifier">Verificador</string>
+    <string name="profile_admin_role_founder">Fundador</string>
+    <string name="profile_admin_user_role_admin">Admin</string>
+    <string name="profile_admin_user_role_user">Usuario</string>
+
+    <!-- ===== EDIT PROFILE SCREEN ===== -->
+    <string name="edit_profile_topbar_title">Editar Perfil</string>
+    <string name="edit_profile_back">Volver</string>
+    <string name="edit_profile_change_photo">Cambiar Foto</string>
+    <string name="edit_profile_label_full_name">Nombre completo</string>
+    <string name="edit_profile_label_email">Correo Electrónico</string>
+    <string name="edit_profile_label_phone">Teléfono</string>
+    <string name="edit_profile_label_bio">Bio</string>
+    <string name="edit_profile_btn_change_password">Cambiar Contraseña</string>
+    <string name="edit_profile_btn_save">Guardar Cambios</string>
+    <string name="edit_profile_toast_saved">Perfil guardado exitosamente</string>
+    <!-- Change Password Dialog -->
+    <string name="change_password_dialog_title">Cambiar Contraseña</string>
+    <string name="change_password_label_current">Contraseña Actual</string>
+    <string name="change_password_label_new">Nueva Contraseña</string>
+    <string name="change_password_btn_update">Actualizar</string>
+    <string name="change_password_btn_cancel">Cancelar</string>
+    <string name="change_password_error_length">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="change_password_error_incorrect">Contraseña actual incorrecta</string>
+    <string name="change_password_toast_updated">Contraseña actualizada</string>
+
+    <!-- ===== DETAIL REPORT SCREEN ===== -->
+    <string name="detail_report_topbar_title">Detalle del Reporte</string>
+    <string name="detail_report_back">Volver</string>
+    <string name="detail_report_comments_title">Comentarios (%1$d)</string>
+    <string name="detail_report_is_important">¡Es Importante!</string>
+    <string name="detail_report_location_title">Ubicación</string>
+    <string name="detail_report_map_coming_soon">Mapa disponible en futuras actualizaciones</string>
+    <string name="detail_report_me_avatar">YO</string>
+    <string name="detail_report_comment_placeholder">Escribe un comentario ...</string>
+    <string name="detail_report_send">Enviar</string>
+    <string name="detail_report_user_prefix">Usuario %1$s</string>
+
+    <!-- ===== STATISTICS SCREEN ===== -->
+    <string name="statistics_topbar_title">Estadísticas del Mes</string>
+    <string name="statistics_back">Volver</string>
+    <string name="statistics_options">Opciones</string>
+    <string name="statistics_reports_by_month">Reportes por Mes</string>
+    <string name="statistics_total_accumulated">Total acumulado este mes</string>
+    <string name="statistics_week_1">SEM 1</string>
+    <string name="statistics_week_2">SEM 2</string>
+    <string name="statistics_week_3">SEM 3</string>
+    <string name="statistics_week_4">SEM 4</string>
+    <string name="statistics_activity_summary">Resumen de Actividad</string>
+    <string name="statistics_total_reports">Total Reportes</string>
+    <string name="statistics_resolved">Resueltos</string>
+    <string name="statistics_in_progress">En Proceso</string>
+    <string name="statistics_by_category">Por Categoría</string>
+    <string name="statistics_category_security">Seguridad</string>
+    <string name="statistics_category_transit">Tránsito</string>
+
+    <!-- ===== ADMIN CONTROL PANEL ===== -->
+    <string name="admin_panel_topbar_title">Funciones Administrador</string>
+    <string name="admin_panel_back">Volver</string>
+    <string name="admin_panel_title">Panel de Control</string>
+    <string name="admin_panel_subtitle">Herramientas de gestión avanzada y monitoreo de infraestructura.</string>
+    <string name="admin_panel_func_users_title">Usuarios</string>
+    <string name="admin_panel_func_users_subtitle">Gestión de cuentas</string>
+    <string name="admin_panel_func_settings_title">Configuración</string>
+    <string name="admin_panel_func_settings_subtitle">Ajustes del core</string>
+    <string name="admin_panel_func_reports_title">Reportes</string>
+    <string name="admin_panel_func_reports_subtitle">Gestion de Reportes</string>
+    <string name="admin_panel_func_categories_title">Categorías</string>
+    <string name="admin_panel_func_categories_subtitle">Gestion de Categorias</string>
+    <string name="admin_panel_analytics_title">Análisis de Datos</string>
+    <string name="admin_panel_analytics_subtitle">Métricas de rendimiento en tiempo real</string>
+    <string name="admin_panel_system_status_title">Estado del Sistema</string>
+    <string name="admin_panel_system_status_text">Todos los nodos de red y bases de datos operan sin latencia. Próximo mantenimiento programado: 48h.</string>
+    <string name="admin_panel_btn_detailed_report">Ver Reporte Detallado</string>
+
+    <!-- ===== ADMIN DATA ANALYSIS ===== -->
+    <string name="admin_data_topbar_title">Análisis de Datos</string>
+    <string name="admin_data_back">Volver</string>
+    <string name="admin_data_notifications">Notificaciones</string>
+    <string name="admin_data_tab_weekly">Semanal</string>
+    <string name="admin_data_tab_monthly">Mensual</string>
+    <string name="admin_data_tab_yearly">Anual</string>
+    <string name="admin_data_total_reports">Total Reportes</string>
+    <string name="admin_data_vs_previous_month">+5%% vs mes anterior</string>
+    <string name="admin_data_resolved">Resueltos</string>
+    <string name="admin_data_critical">Críticos</string>
+    <string name="admin_data_category_breakdown">Desglose por Categoría</string>
+    <string name="admin_data_cat_security">Seguridad</string>
+    <string name="admin_data_cat_infrastructure">Infraestructura</string>
+    <string name="admin_data_cat_health">Salud</string>
+    <string name="admin_data_cat_others">Otros</string>
+    <string name="admin_data_zones_title">Zonas con más reportes</string>
+    <string name="admin_data_map_description">Mapa Placeholder</string>
+
+    <!-- ===== ADMIN REPORT MODERATION ===== -->
+    <string name="admin_moderation_topbar_title">Moderación Reportes Ciudadanos IA</string>
+    <string name="admin_moderation_back">Volver</string>
+    <string name="admin_moderation_header">Reportes Recientes</string>
+    <string name="admin_moderation_subheader">Resumen de tráfico y seguridad generado por IA.</string>
+    <string name="admin_moderation_empty_title">Sin reportes pendientes</string>
+    <string name="admin_moderation_empty_subtitle">Todos los reportes han sido moderados.</string>
+    <string name="admin_moderation_ai_label">RESUMEN IA</string>
+    <string name="admin_moderation_key_points">PUNTOS CLAVE</string>
+    <string name="admin_moderation_relevance_label">NIVEL DE\nRELEVANCIA</string>
+    <string name="admin_moderation_actions_label">ACCIONES</string>
+    <string name="admin_moderation_btn_verify">Verificar</string>
+    <string name="admin_moderation_btn_reject">Rechazar</string>
+    <string name="admin_moderation_time_now">Reportado hace un momento</string>
+    <string name="admin_moderation_time_minutes">Reportado hace %1$d min</string>
+    <string name="admin_moderation_time_hours">Reportado hace %1$d h</string>
+    <string name="admin_moderation_time_days">Reportado hace %1$d días</string>
+    <string name="admin_moderation_by_reporter">%1$s • Por: %2$s</string>
+    <string name="admin_moderation_priority_high">ALTA PRIORIDAD (RIESGO VIAL)</string>
+    <string name="admin_moderation_priority_medium">MEDIA (SEGURIDAD CIUDADANA)</string>
+    <string name="admin_moderation_priority_normal">NORMAL (REVISIÓN ESTÁNDAR)</string>
 </resources>

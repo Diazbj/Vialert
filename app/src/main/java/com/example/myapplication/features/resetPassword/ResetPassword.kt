@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ fun ResetPassword(
 ){
 
     val context = LocalContext.current
+    val toastMessage = stringResource(R.string.reset_password_toast_updated)
 
     Column(
         modifier = Modifier.fillMaxSize().padding(30.dp),
@@ -46,11 +48,11 @@ fun ResetPassword(
         Image(
             modifier = Modifier.size(250.dp),
             painter = painterResource(id = R.drawable.vialert),
-            contentDescription = "Logo"
+            contentDescription = stringResource(R.string.home_logo_description)
         )
 
         Text(
-            text = "Actualice su contraseña",
+            text = stringResource(R.string.reset_password_title),
             fontSize = 26.sp,
             color = Color.DarkGray
         )
@@ -58,7 +60,7 @@ fun ResetPassword(
         OutlinedTextField(
             value = viewModel.password1.value,
             onValueChange = { viewModel.password1.onChange(it) },
-            label = { Text("Ingrese su nueva contraseña") },
+            label = { Text(stringResource(R.string.reset_password_label_new)) },
             leadingIcon = {
                 Icon(Icons.Default.Lock, contentDescription = null)
             },
@@ -74,7 +76,7 @@ fun ResetPassword(
         OutlinedTextField(
             value = viewModel.password2.value,
             onValueChange = { viewModel.password2.onChange(it) },
-            label = { Text("Verifique su contraseña") },
+            label = { Text(stringResource(R.string.reset_password_label_confirm)) },
             leadingIcon = {
                 Icon(Icons.Default.Lock, contentDescription = null)
             },
@@ -89,12 +91,12 @@ fun ResetPassword(
 
         Button(
             onClick = {
-                Toast.makeText(context, "Contraseña Actualizada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
             },
             enabled = viewModel.isFormValid,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Actualizar contraseña")
+            Text(stringResource(R.string.reset_password_btn_update))
         }
     }
 

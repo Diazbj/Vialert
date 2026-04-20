@@ -20,13 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.core.navigation.Login
 import com.example.myapplication.core.navigation.SignUp
-import com.example.myapplication.R
 
 @Composable
 fun HomeScreen(
@@ -35,7 +36,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5)) // fondo claro como mockup
+            .background(Color(0xFFF5F5F5))
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -44,11 +45,11 @@ fun HomeScreen(
         Image(
             modifier = Modifier.size(300.dp),
             painter = painterResource(id = R.drawable.vialert),
-            contentDescription = "Logo"
+            contentDescription = stringResource(R.string.home_logo_description)
         )
 
         Text(
-            text = "Reporta problemas viales en tiempo real y construye una ciudad más segura para todos",
+            text = stringResource(R.string.home_tagline),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
             color = Color.Gray
@@ -70,7 +71,7 @@ fun HomeScreen(
                 contentColor = Color.White
             )
         ) {
-            Text(text = "Registrarme")
+            Text(text = stringResource(R.string.home_btn_register))
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -86,13 +87,13 @@ fun HomeScreen(
             shape = RoundedCornerShape(30),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6A1B9A))
         ) {
-            Text(text = "Iniciar Sesión")
+            Text(text = stringResource(R.string.home_btn_login))
         }
 
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = "VIGILANCIA CIUDADANA INTELIGENTE.",
+            text = stringResource(R.string.home_footer),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             color = Color.Gray

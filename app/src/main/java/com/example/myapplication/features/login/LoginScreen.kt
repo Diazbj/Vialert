@@ -8,10 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.core.components.ResultDialog
 import com.example.myapplication.core.components.VialertPasswordField
 import com.example.myapplication.core.components.VialertTextField
@@ -48,7 +50,7 @@ fun LoginScreen(
     ) {
 
         Text(
-            text = "Bienvenido de nuevo",
+            text = stringResource(R.string.login_title),
             style = MaterialTheme.typography.headlineLarge,
             color = Color(0xFF6A1B9A),
             fontSize = 48.sp
@@ -57,7 +59,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Tu seguridad y la de tu comunidad es nuestra prioridad",
+            text = stringResource(R.string.login_subtitle),
             fontSize = 16.sp,
             color = Color.Gray
         )
@@ -67,8 +69,8 @@ fun LoginScreen(
         VialertTextField(
             value = viewModel.email.value,
             onValueChange = { viewModel.email.onChange(it) },
-            label = "Correo electrónico",
-            placeholder = "correo@ejemplo.com",
+            label = stringResource(R.string.login_label_email),
+            placeholder = stringResource(R.string.login_placeholder_email),
             isError = viewModel.email.error != null,
             supportingText = viewModel.email.error
         )
@@ -76,7 +78,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = "Olvide mi contraseña",
+            text = stringResource(R.string.login_forgot_password),
             color = Color(0xFF6A1B9A),
             fontSize = 14.sp,
             modifier = Modifier
@@ -116,7 +118,7 @@ fun LoginScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text(text = "Iniciar Sesión")
+                Text(text = stringResource(R.string.login_btn_login))
             }
         }
 
@@ -130,7 +132,7 @@ fun LoginScreen(
             shape = RoundedCornerShape(30),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6A1B9A))
         ) {
-            Text(text = "Volver")
+            Text(text = stringResource(R.string.login_btn_back))
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -139,7 +141,7 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "¿No tienes cuenta? Regístrate", color = Color(0xFF6A1B9A))
+            Text(text = stringResource(R.string.login_no_account), color = Color(0xFF6A1B9A))
         }
     }
 }

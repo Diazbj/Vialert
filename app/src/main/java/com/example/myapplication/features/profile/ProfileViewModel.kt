@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.datastore.SessionDataStore
+import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.model.User
 import com.example.myapplication.domain.model.UserLevel
@@ -29,7 +30,9 @@ data class ProfileUiState(
     val user: User? = null,
     val userLevel: UserLevel = UserLevel.NIVEL_1,
     val stats: ProfileStats = ProfileStats(),
-    val pointsProgress: Float = 0f
+    val pointsProgress: Float = 0f,
+    val myReports: List<Report> = emptyList(),
+    val allUsers: List<User> = emptyList()
 )
 
 @HiltViewModel
@@ -42,15 +45,8 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    // Logros (Mantenidos como estaban)
-    val logros = mutableStateListOf(
-        Achievement("Primer Reporte", "trophy", false),
-        Achievement("10 Verificados", "shield", false),
-        Achievement("Racha 7 días", "fire", false),
-        Achievement("Colaborador", "handshake", false),
-        Achievement("Guardián Urbano", "lock", true),
-        Achievement("Influencer Vial", "lock", true)
-    )
+    // Logros dinámicos
+    val logros = mutableStateListOf<Achievement>()
 
     init {
         observeData()
@@ -67,8 +63,11 @@ class ProfileViewModel @Inject constructor(
                 val user = allUsers.find { it.id == currentUserId }
                 val myReports = allReports.filter { it.ownerId == currentUserId }
                 
-                Triple(user, myReports, currentUserId)
-            }.collect { (user, myReports, _) ->
+                ObservedData(user, myReports, allUsers)
+            }.collect { data ->
+                val user = data.user
+                val myReports = data.myReports
+                val allUsers = data.allUsers
                 if (user != null) {
                     val level = UserLevel.fromScore(user.score)
                     val pointsInLevel = user.score - level.minPoints
@@ -84,9 +83,23 @@ class ProfileViewModel @Inject constructor(
                                 pending = myReports.count { it.status == ReportStatus.PENDING },
                                 verified = myReports.count { it.status == ReportStatus.IN_PROGRESS },
                                 resolved = myReports.count { it.status == ReportStatus.RESOLVED }
-                            )
+                            ),
+                            myReports = myReports,
+                            allUsers = allUsers
                         )
                     }
+
+                    // Actualizar logros basados en las stats
+                    val hasFirstReport = myReports.isNotEmpty()
+                    val hasVerified = myReports.count { it.status == ReportStatus.RESOLVED || it.status == ReportStatus.IN_PROGRESS } >= 10
+                    
+                    logros.clear()
+                    logros.add(Achievement("Primer Reporte", "trophy", !hasFirstReport))
+                    logros.add(Achievement("10 Verificados", "shield", !hasVerified))
+                    logros.add(Achievement("Racha 7 días", "fire", true)) // Pendiente de implementar lógica temporal real
+                    logros.add(Achievement("Colaborador", "handshake", user.score < 50))
+                    logros.add(Achievement("Guardián Urbano", "lock", user.score < 200))
+                    logros.add(Achievement("Influencer Vial", "lock", user.score < 500))
                 }
             }
         }
@@ -98,12 +111,42 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    // Funcionalidad futura
-    fun toggleEditing() {}
+    fun saveProfile(fullName: String, phone: String, bio: String) {
+        val currentUser = _uiState.value.user ?: return
+        val parts = fullName.trim().split(" ", limit = 2)
+        val firstName = parts.getOrNull(0) ?: ""
+        val lastName = parts.getOrNull(1) ?: ""
+
+        if (firstName.isNotBlank()) {
+            val updatedUser = currentUser.copy(
+                firstName = firstName,
+                lastName = lastName,
+                phone = phone,
+                bio = bio
+            )
+            userRepository.update(updatedUser)
+        }
+    }
+
+    fun changePassword(currentPass: String, newPass: String): Boolean {
+        val currentUser = _uiState.value.user ?: return false
+        if (currentUser.password == currentPass && newPass.length >= 6) {
+            val updatedUser = currentUser.copy(password = newPass)
+            userRepository.update(updatedUser)
+            return true
+        }
+        return false
+    }
 }
 
 data class Achievement(
     val title: String,
     val iconType: String,
     val isLocked: Boolean
+)
+
+private data class ObservedData(
+    val user: User?,
+    val myReports: List<Report>,
+    val allUsers: List<User>
 )

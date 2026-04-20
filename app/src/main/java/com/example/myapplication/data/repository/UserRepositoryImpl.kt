@@ -2,6 +2,7 @@ package com.example.myapplication.data.repository
 
 import com.example.myapplication.domain.model.User
 import com.example.myapplication.domain.model.UserRole
+import com.example.myapplication.domain.model.Gender
 import com.example.myapplication.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -70,11 +71,11 @@ class UserRepositoryImpl @Inject constructor() : UserRepository {
             ),
             User(
                 id = "2",
-                firstName = "Admin",
-                lastName = "Vialert",
+                firstName = "admin",
+                lastName = "vialert",
                 email = "admin@vialert.com",
                 userName = "admin",
-                password = "adminpassword",
+                password = "123456789",
                 role = UserRole.ADMIN
             ),
             User(
@@ -84,6 +85,17 @@ class UserRepositoryImpl @Inject constructor() : UserRepository {
                 email = "maria@example.com",
                 userName = "marial",
                 password = "mypassword",
+                role = UserRole.USER
+            ),
+            User(
+                id = "4",
+                firstName = "jordy",
+                lastName = "diaz",
+                email = "diaz.jordyb@gmail.com",
+                userName = "diazjordy",
+                password = "123456789",
+                gender = Gender.MASCULINO,
+                birthDate = "21/03/1993",
                 role = UserRole.USER
             )
         )
