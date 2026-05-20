@@ -12,50 +12,16 @@ class CommentRepositoryImpl @Inject constructor() : CommentRepository {
 
     init {
         items.addAll(listOf(
-            Comment(
-                id = "c1",
-                reportId = "101",
-                userId = "2",
-                content = "Estamos revisando este bache, gracias por reportar.",
-                createdAt = LocalDateTime.now().minusDays(1)
-            ),
-            Comment(
-                id = "c2",
-                reportId = "101",
-                userId = "1",
-                content = "Gracias, es muy peligroso de noche.",
-                createdAt = LocalDateTime.now().minusMinutes(30)
-            ),
-            Comment(
-                id = "c3",
-                reportId = "102",
-                userId = "2",
-                content = "Técnicos en camino para la reparación.",
-                createdAt = LocalDateTime.now().minusHours(2)
-            )
+            Comment(id = "c1", reportId = "101", userId = "2", content = "Estamos revisando este bache, gracias por reportar.", createdAt = LocalDateTime.now().minusDays(1)),
+            Comment(id = "c2", reportId = "101", userId = "1", content = "Gracias, es muy peligroso de noche.", createdAt = LocalDateTime.now().minusMinutes(30)),
+            Comment(id = "c3", reportId = "102", userId = "2", content = "Técnicos en camino para la reparación.", createdAt = LocalDateTime.now().minusHours(2))
         ))
     }
 
     override fun getAll(): List<Comment> = items.toList()
-
     override fun getById(id: String): Comment? = items.find { it.id == id }
-
-    override fun create(comment: Comment) {
-        items.add(comment)
-    }
-
-    override fun update(comment: Comment) {
-        val index = items.indexOfFirst { it.id == comment.id }
-        if (index != -1) {
-            items[index] = comment
-        }
-    }
-
-    override fun delete(id: String) {
-        items.removeAll { it.id == id }
-    }
-
-    override fun getByReportId(reportId: String): List<Comment> {
-        return items.filter { it.reportId == reportId }
-    }
+    override suspend fun create(comment: Comment) { items.add(comment) }
+    override fun update(comment: Comment) { val i = items.indexOfFirst { it.id == comment.id }; if (i != -1) items[i] = comment }
+    override fun delete(id: String) { items.removeAll { it.id == id } }
+    override fun getByReportId(reportId: String): List<Comment> = items.filter { it.reportId == reportId }
 }

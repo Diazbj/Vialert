@@ -7,9 +7,9 @@ interface ReportRepository {
     val reports: StateFlow<List<Report>>
     fun getAll(): List<Report>
     fun getById(id: String): Report?
-    fun create(report: Report)
-    fun update(report: Report)
-    fun delete(id: String)
+    suspend fun create(report: Report)
+    suspend fun update(report: Report)
+    suspend fun delete(id: String)
     fun getByUserId(userId: String): List<Report>
-    fun incrementarImportancia(id: String)
+    suspend fun incrementarImportancia(id: String)
 }

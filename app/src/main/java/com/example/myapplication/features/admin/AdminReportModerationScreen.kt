@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.data.service.AiReportAnalysis
 import com.example.myapplication.domain.model.Report
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +40,7 @@ fun AdminReportModerationScreen(
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val aiAnalyses by viewModel.aiAnalyses.collectAsState()
 
     Scaffold(
         topBar = {
@@ -69,7 +72,6 @@ fun AdminReportModerationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // Header
             Text(
                 stringResource(R.string.admin_moderation_header),
                 fontSize = 24.sp,
@@ -86,55 +88,33 @@ fun AdminReportModerationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (uiState.pendingReports.isEmpty()) {
-                // Empty state
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(48.dp),
+                        modifier = Modifier.fillMaxWidth().padding(48.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFFF3E8FF),
-                            modifier = Modifier.size(64.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = Color(0xFF7C3AED),
-                                modifier = Modifier.padding(16.dp)
-                            )
+                        Surface(shape = CircleShape, color = Color(0xFFF3E8FF), modifier = Modifier.size(64.dp)) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF7C3AED), modifier = Modifier.padding(16.dp))
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            stringResource(R.string.admin_moderation_empty_title),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
-                        )
+                        Text(stringResource(R.string.admin_moderation_empty_title), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.admin_moderation_empty_subtitle),
-                            fontSize = 12.sp,
-                            color = Color(0xFF64748B)
-                        )
+                        Text(stringResource(R.string.admin_moderation_empty_subtitle), fontSize = 12.sp, color = Color(0xFF64748B))
                     }
                 }
             } else {
                 uiState.pendingReports.forEach { reportWithOwner ->
                     var visible by remember { mutableStateOf(true) }
+                    val aiAnalysis = aiAnalyses[reportWithOwner.report.id]
 
-                    AnimatedVisibility(
-                        visible = visible,
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
+                    AnimatedVisibility(visible = visible, exit = shrinkVertically() + fadeOut()) {
                         ModerationReportCard(
                             reportWithOwner = reportWithOwner,
+                            aiAnalysis = aiAnalysis,
                             onVerify = {
                                 viewModel.verifyReport(reportWithOwner.report.id)
                                 visible = false
@@ -142,14 +122,13 @@ fun AdminReportModerationScreen(
                             onReject = {
                                 viewModel.rejectReport(reportWithOwner.report.id)
                                 visible = false
-                            }
+                            },
+                            onReanalyze = { viewModel.analyzeReport(reportWithOwner.report) }
                         )
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -158,39 +137,21 @@ fun AdminReportModerationScreen(
 @Composable
 private fun ModerationReportCard(
     reportWithOwner: ReportWithOwner,
+    aiAnalysis: AiReportAnalysis?,
     onVerify: () -> Unit,
-    onReject: () -> Unit
+    onReject: () -> Unit,
+    onReanalyze: () -> Unit
 ) {
     val report = reportWithOwner.report
 
-    // Determine category color based on report type
     val categoryColor = when {
         report.type.contains("Seguridad", ignoreCase = true) -> Color(0xFF7C3AED)
         report.type.contains("Infraestructura", ignoreCase = true) -> Color(0xFFF59E0B)
         report.type.contains("Vial", ignoreCase = true) -> Color(0xFFF59E0B)
-        report.type.contains("Salud", ignoreCase = true) -> Color(0xFF10B981)
         report.type.contains("Alumbrado", ignoreCase = true) -> Color(0xFF3B82F6)
         else -> Color(0xFF64748B)
     }
 
-    // Determine relevance level
-    val relevanceLevel = when {
-        report.important >= 5 -> stringResource(R.string.admin_moderation_priority_high)
-        report.important >= 2 -> stringResource(R.string.admin_moderation_priority_medium)
-        else -> stringResource(R.string.admin_moderation_priority_normal)
-    }
-    val relevanceColor = when {
-        report.important >= 5 -> Color(0xFFEF4444)
-        report.important >= 2 -> Color(0xFFF59E0B)
-        else -> Color(0xFF3B82F6)
-    }
-    val relevanceBg = when {
-        report.important >= 5 -> Color(0xFFFEE2E2)
-        report.important >= 2 -> Color(0xFFFFF3CD)
-        else -> Color(0xFFDBEAFE)
-    }
-
-    // Time ago
     val minutesAgo = ((System.currentTimeMillis() - report.createdAt) / 60000).toInt()
     val timeStr = when {
         minutesAgo < 1 -> stringResource(R.string.admin_moderation_time_now)
@@ -199,8 +160,17 @@ private fun ModerationReportCard(
         else -> stringResource(R.string.admin_moderation_time_days, minutesAgo / 1440)
     }
 
-    // Generate AI summary based on report data
-    val aiSummary = generateAiSummary(report)
+    // Color de recomendación IA
+    val aiRecommendationColor = when (aiAnalysis?.recommendation) {
+        "VERIFICAR" -> Color(0xFF10B981)
+        "RECHAZAR" -> Color(0xFFEF4444)
+        else -> Color(0xFF64748B)
+    }
+    val aiRecommendationBg = when (aiAnalysis?.recommendation) {
+        "VERIFICAR" -> Color(0xFFD1FAE5)
+        "RECHAZAR" -> Color(0xFFFEE2E2)
+        else -> Color(0xFFF1F5F9)
+    }
 
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -209,55 +179,22 @@ private fun ModerationReportCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
-            // Purple left-border accent + category tag
             Row(modifier = Modifier.fillMaxWidth()) {
-                // Left accent bar
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(topStart = 20.dp))
-                        .background(categoryColor)
-                )
+                Box(modifier = Modifier.width(4.dp).height(28.dp).clip(RoundedCornerShape(topStart = 20.dp)).background(categoryColor))
                 Spacer(modifier = Modifier.width(12.dp))
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = categoryColor.copy(alpha = 0.1f),
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Text(
-                        text = report.type,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = categoryColor,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
+                Surface(shape = RoundedCornerShape(8.dp), color = categoryColor.copy(alpha = 0.1f), modifier = Modifier.padding(top = 16.dp)) {
+                    Text(text = report.type, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = categoryColor, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
                 }
             }
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Spacer(modifier = Modifier.height(8.dp))
-
-                // Report title
-                Text(
-                    text = report.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
-                )
-
+                Text(text = report.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                 Spacer(modifier = Modifier.height(4.dp))
-
-                // Reporter & time
-                Text(
-                    text = stringResource(R.string.admin_moderation_by_reporter, timeStr, reportWithOwner.ownerName),
-                    fontSize = 11.sp,
-                    color = Color(0xFF94A3B8)
-                )
-
+                Text(text = stringResource(R.string.admin_moderation_by_reporter, timeStr, reportWithOwner.ownerName), fontSize = 11.sp, color = Color(0xFF94A3B8))
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // AI Summary Card
+                // Tarjeta de análisis IA
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF5FF)),
@@ -265,100 +202,70 @@ private fun ModerationReportCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        // AI Header
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = Color(0xFF7C3AED),
-                                modifier = Modifier.size(14.dp)
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF7C3AED), modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                stringResource(R.string.admin_moderation_ai_label),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFF7C3AED),
-                                letterSpacing = 1.sp
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Key Points
-                        Text(
-                            stringResource(R.string.admin_moderation_key_points),
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF64748B),
-                            letterSpacing = 0.5.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        aiSummary.forEach { point ->
-                            Row(modifier = Modifier.padding(bottom = 4.dp)) {
-                                Text("  •  ", fontSize = 11.sp, color = Color(0xFF7C3AED))
-                                Text(
-                                    point,
-                                    fontSize = 12.sp,
-                                    color = Color(0xFF475569),
-                                    lineHeight = 16.sp
-                                )
+                            Text(stringResource(R.string.admin_moderation_ai_label), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF7C3AED), letterSpacing = 1.sp, modifier = Modifier.weight(1f))
+                            IconButton(onClick = onReanalyze, modifier = Modifier.size(20.dp)) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Re-analizar", tint = Color(0xFF7C3AED), modifier = Modifier.size(14.dp))
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                        HorizontalDivider(color = Color(0xFFF3E8FF))
-                        Spacer(modifier = Modifier.height(12.dp))
+                        if (aiAnalysis == null || aiAnalysis.isLoading) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color(0xFF7C3AED))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Analizando con Gemini IA...", fontSize = 11.sp, color = Color(0xFF64748B))
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(stringResource(R.string.admin_moderation_key_points), fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF64748B), letterSpacing = 0.5.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            aiAnalysis.keyPoints.forEach { point ->
+                                Row(modifier = Modifier.padding(bottom = 4.dp)) {
+                                    Text("  •  ", fontSize = 11.sp, color = Color(0xFF7C3AED))
+                                    Text(point, fontSize = 12.sp, color = Color(0xFF475569), lineHeight = 16.sp)
+                                }
+                            }
 
-                        // Relevance Level
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                stringResource(R.string.admin_moderation_relevance_label),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFF64748B),
-                                letterSpacing = 0.5.sp,
-                                lineHeight = 12.sp
-                            )
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = relevanceBg,
-                                border = BorderStroke(1.dp, relevanceColor.copy(alpha = 0.3f))
-                            ) {
-                                Text(
-                                    text = relevanceLevel,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = relevanceColor,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                                )
+                            if (aiAnalysis.reasoning.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(aiAnalysis.reasoning, fontSize = 11.sp, color = Color(0xFF64748B), lineHeight = 15.sp)
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider(color = Color(0xFFF3E8FF))
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Column {
+                                    Text(stringResource(R.string.admin_moderation_relevance_label), fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF64748B), letterSpacing = 0.5.sp, lineHeight = 12.sp)
+                                    if (aiAnalysis.confidence.isNotBlank()) {
+                                        Text("Confianza: ${aiAnalysis.confidence}", fontSize = 9.sp, color = Color(0xFF94A3B8))
+                                    }
+                                }
+                                if (aiAnalysis.recommendation.isNotBlank()) {
+                                    Surface(shape = RoundedCornerShape(8.dp), color = aiRecommendationBg, border = BorderStroke(1.dp, aiRecommendationColor.copy(alpha = 0.3f))) {
+                                        Text(
+                                            text = "IA: ${aiAnalysis.recommendation}",
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = aiRecommendationColor,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Actions
-                Text(
-                    stringResource(R.string.admin_moderation_actions_label),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF64748B),
-                    letterSpacing = 0.5.sp
-                )
-
+                Text(stringResource(R.string.admin_moderation_actions_label), fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF64748B), letterSpacing = 0.5.sp)
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = onVerify,
                         modifier = Modifier.weight(1f).height(42.dp),
@@ -369,7 +276,6 @@ private fun ModerationReportCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(stringResource(R.string.admin_moderation_btn_verify), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
-
                     OutlinedButton(
                         onClick = onReject,
                         modifier = Modifier.weight(1f).height(42.dp),
@@ -382,36 +288,8 @@ private fun ModerationReportCard(
                         Text(stringResource(R.string.admin_moderation_btn_reject), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
-}
-
-/**
- * Generates simulated AI summary key points based on the report data.
- */
-private fun generateAiSummary(report: Report): List<String> {
-    val points = mutableListOf<String>()
-
-    // Location point
-    points.add("Ubicación exacta: Lat ${String.format("%.4f", report.location.latitude)}, Lng ${String.format("%.4f", report.location.longitude)}.")
-
-    // Description-based insight
-    if (report.description.isNotBlank()) {
-        points.add("Gravedad: ${report.description}")
-    }
-
-    // Type-based impact
-    val impact = when {
-        report.type.contains("Seguridad", ignoreCase = true) -> "Impacto: Zona con incidencia de seguridad, requiere patrullaje."
-        report.type.contains("Infraestructura", ignoreCase = true) -> "Impacto: Daño severo al pavimento, riesgo de ponchaduras."
-        report.type.contains("Vial", ignoreCase = true) -> "Impacto: Riesgo vial activo, posible afectación a tránsito vehicular."
-        report.type.contains("Alumbrado", ignoreCase = true) -> "Impacto: Zona oscura propicia para incidentes."
-        else -> "Impacto: Requiere evaluación presencial del equipo técnico."
-    }
-    points.add(impact)
-
-    return points
 }

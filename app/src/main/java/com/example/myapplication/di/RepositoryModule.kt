@@ -2,9 +2,10 @@ package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.CommentRepositoryImpl
 import com.example.myapplication.data.repository.NotificationRepositoryImpl
-import com.example.myapplication.data.repository.ReportRepositoryImpl
-import com.example.myapplication.data.repository.UserRepositoryImpl
 import com.example.myapplication.data.repository.NotificacionUsuarioRepositoryImpl
+import com.example.myapplication.data.repository.firebase.CommentFirebaseRepositoryImpl
+import com.example.myapplication.data.repository.firebase.ReportFirebaseRepositoryImpl
+import com.example.myapplication.data.repository.firebase.UserFirebaseRepositoryImpl
 import com.example.myapplication.domain.repository.CommentRepository
 import com.example.myapplication.domain.repository.NotificationRepository
 import com.example.myapplication.domain.repository.ReportRepository
@@ -23,19 +24,19 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(
-        userRepositoryImpl: UserRepositoryImpl
+        userFirebaseRepositoryImpl: UserFirebaseRepositoryImpl
     ): UserRepository
 
     @Binds
     @Singleton
     abstract fun bindReportRepository(
-        reportRepositoryImpl: ReportRepositoryImpl
+        reportFirebaseRepositoryImpl: ReportFirebaseRepositoryImpl
     ): ReportRepository
 
     @Binds
     @Singleton
     abstract fun bindCommentRepository(
-        commentRepositoryImpl: CommentRepositoryImpl
+        commentFirebaseRepositoryImpl: CommentFirebaseRepositoryImpl
     ): CommentRepository
 
     @Binds

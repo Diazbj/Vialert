@@ -7,9 +7,12 @@ interface UserRepository {
     val users: StateFlow<List<User>>
     fun getAll(): List<User>
     fun getById(id: String): User?
-    fun create(user: User)
-    fun update(user: User)
+    suspend fun create(user: User)
+    suspend fun update(user: User)
     fun delete(id: String)
     fun findByEmail(email: String): User?
-    fun findByEmailAndPassword(email: String, password: String): User?
+    suspend fun findByEmailAndPassword(email: String, password: String): User?
+    suspend fun sendPasswordReset(email: String)
+    fun signOut()
+    fun getCurrentUserId(): String?
 }

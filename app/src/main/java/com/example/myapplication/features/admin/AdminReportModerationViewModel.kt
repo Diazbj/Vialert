@@ -2,6 +2,8 @@ package com.example.myapplication.features.admin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.service.AiReportAnalysis
+import com.example.myapplication.data.service.GeminiAiService
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.model.User
@@ -28,11 +30,16 @@ data class ReportWithOwner(
 @HiltViewModel
 class AdminReportModerationViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val geminiAiService: GeminiAiService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ModerationUiState())
     val uiState: StateFlow<ModerationUiState> = _uiState.asStateFlow()
+
+    // Mapa de análisis IA por reportId
+    private val _aiAnalyses = MutableStateFlow<Map<String, AiReportAnalysis>>(emptyMap())
+    val aiAnalyses: StateFlow<Map<String, AiReportAnalysis>> = _aiAnalyses.asStateFlow()
 
     init {
         observeData()
@@ -57,17 +64,46 @@ class AdminReportModerationViewModel @Inject constructor(
                 ModerationUiState(pendingReports = pending)
             }.collect { state ->
                 _uiState.value = state
+                // Analizar con IA los nuevos reportes que no han sido analizados
+                state.pendingReports.forEach { item ->
+                    if (!_aiAnalyses.value.containsKey(item.report.id)) {
+                        analyzeReport(item.report)
+                    }
+                }
+            }
+        }
+    }
+
+    fun analyzeReport(report: Report) {
+        viewModelScope.launch {
+            // Marcar como cargando
+            _aiAnalyses.update { current ->
+                current + (report.id to AiReportAnalysis(
+                    recommendation = "",
+                    confidence = "",
+                    keyPoints = emptyList(),
+                    reasoning = "",
+                    isLoading = true
+                ))
+            }
+            val analysis = geminiAiService.analyzeReport(report)
+            _aiAnalyses.update { current ->
+                current + (report.id to analysis)
             }
         }
     }
 
     fun verifyReport(reportId: String) {
         val report = reportRepository.getById(reportId) ?: return
-        reportRepository.update(report.copy(status = ReportStatus.IN_PROGRESS))
+        viewModelScope.launch {
+            reportRepository.update(report.copy(status = ReportStatus.IN_PROGRESS))
+        }
     }
 
     fun rejectReport(reportId: String) {
         val report = reportRepository.getById(reportId) ?: return
-        reportRepository.update(report.copy(status = ReportStatus.DELETED))
+        viewModelScope.launch {
+            reportRepository.update(report.copy(status = ReportStatus.DELETED))
+        }
     }
 }

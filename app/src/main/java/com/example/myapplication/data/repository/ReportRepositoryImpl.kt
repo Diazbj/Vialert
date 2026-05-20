@@ -19,84 +19,32 @@ class ReportRepositoryImpl @Inject constructor() : ReportRepository {
 
     override fun getById(id: String): Report? = _reports.value.find { it.id == id }
 
-    override fun create(report: Report) {
-        val currentList = _reports.value.toMutableList()
-        val reportWithDate = report.copy(
-            createdAt = System.currentTimeMillis(),
-            important = 0
-        )
-        currentList.add(reportWithDate)
-        _reports.value = currentList
+    override suspend fun create(report: Report) {
+        _reports.value = _reports.value + report.copy(createdAt = System.currentTimeMillis(), important = 0)
     }
 
-    override fun update(report: Report) {
-        val currentList = _reports.value.toMutableList()
-        val index = currentList.indexOfFirst { it.id == report.id }
-        if (index != -1) {
-            currentList[index] = report
-            _reports.value = currentList
-        }
+    override suspend fun update(report: Report) {
+        _reports.value = _reports.value.map { if (it.id == report.id) report else it }
     }
 
-    override fun delete(id: String) {
-        val currentList = _reports.value.toMutableList()
-        currentList.removeAll { it.id == id }
-        _reports.value = currentList
+    override suspend fun delete(id: String) {
+        _reports.value = _reports.value.filter { it.id != id }
     }
 
-    override fun getByUserId(userId: String): List<Report> {
-        return _reports.value.filter { it.ownerId == userId }
-    }
+    override fun getByUserId(userId: String): List<Report> = _reports.value.filter { it.ownerId == userId }
 
-    override fun incrementarImportancia(id: String) {
-        val currentList = _reports.value.toMutableList()
-        val index = currentList.indexOfFirst { it.id == id }
-        if (index != -1) {
-            val report = currentList[index]
-            currentList[index] = report.copy(important = report.important + 1)
-            _reports.value = currentList
+    override suspend fun incrementarImportancia(id: String) {
+        _reports.value = _reports.value.map {
+            if (it.id == id) it.copy(important = it.important + 1) else it
         }
     }
 
     private fun fetchInitialReports(): List<Report> {
         val now = System.currentTimeMillis()
         return listOf(
-            Report(
-                id = "101",
-                title = "Bache peligroso",
-                description = "Bache de gran tamaño en medio de la avenida.",
-                location = Location(-25.2822, -57.6351),
-                status = ReportStatus.PENDING,
-                type = "Infraestructura",
-                photoUrl = "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=800&auto=format&fit=crop",
-                ownerId = "1",
-                createdAt = now - (1000 * 60 * 12),
-                important = 0
-            ),
-            Report(
-                id = "102",
-                title = "Semáforo averiado",
-                description = "El semáforo no cambia a verde.",
-                location = Location(-25.2950, -57.5800),
-                status = ReportStatus.IN_PROGRESS,
-                type = "Seguridad Vial",
-                photoUrl = "https://images.unsplash.com/photo-1515511856280-7b23f68d2996?q=80&w=800&auto=format&fit=crop",
-                ownerId = "3",
-                createdAt = now - (1000 * 60 * 60),
-                important = 0
-            ),
-            Report(
-                id = "103",
-                title = "Falta de iluminación",
-                description = "Calle muy oscura por falta de focos.",
-                location = Location(-25.3000, -57.6000),
-                status = ReportStatus.RESOLVED,
-                type = "Alumbrado",
-                photoUrl = "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=800&auto=format&fit=crop",
-                ownerId = "1",
-                createdAt = now - (1000 * 60 * 60 * 3),
-                important = 0
-            )
+            Report(id = "101", title = "Bache peligroso", description = "Bache de gran tamaño en medio de la avenida.", location = Location(-25.2822, -57.6351), status = ReportStatus.PENDING, type = "Infraestructura", photoUrl = "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=800", ownerId = "1", createdAt = now - 720000),
+            Report(id = "102", title = "Semáforo averiado", description = "El semáforo no cambia a verde.", location = Location(-25.2950, -57.5800), status = ReportStatus.IN_PROGRESS, type = "Seguridad Vial", photoUrl = "https://images.unsplash.com/photo-1515511856280-7b23f68d2996?q=80&w=800", ownerId = "3", createdAt = now - 3600000),
+            Report(id = "103", title = "Falta de iluminación", description = "Calle muy oscura por falta de focos.", location = Location(-25.3000, -57.6000), status = ReportStatus.RESOLVED, type = "Alumbrado", photoUrl = "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=800", ownerId = "1", createdAt = now - 10800000)
         )
     }
 }

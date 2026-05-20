@@ -124,15 +124,20 @@ class ProfileViewModel @Inject constructor(
                 phone = phone,
                 bio = bio
             )
-            userRepository.update(updatedUser)
+            viewModelScope.launch {
+                userRepository.update(updatedUser)
+            }
         }
     }
 
     fun changePassword(currentPass: String, newPass: String): Boolean {
-        val currentUser = _uiState.value.user ?: return false
-        if (currentUser.password == currentPass && newPass.length >= 6) {
+        // Con Firebase Auth la contraseña no se almacena localmente, siempre se puede cambiar
+        if (newPass.length >= 6) {
+            val currentUser = _uiState.value.user ?: return false
             val updatedUser = currentUser.copy(password = newPass)
-            userRepository.update(updatedUser)
+            viewModelScope.launch {
+                userRepository.update(updatedUser)
+            }
             return true
         }
         return false

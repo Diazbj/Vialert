@@ -36,13 +36,16 @@ class ForgetPasswordViewModel @Inject constructor(
         if (isFormValid) {
             viewModelScope.launch {
                 _forgetPasswordResult.value = RequestResult.Loading
-                
-                val user = userRepository.findByEmail(email.value)
-                
-                if (user != null) {
-                    _forgetPasswordResult.value = RequestResult.Success("Enlace de recuperación enviado a ${email.value}")
-                } else {
-                    _forgetPasswordResult.value = RequestResult.Failure("No existe ninguna cuenta asociada a este correo electrónico")
+                try {
+                    // Enviar email de recuperación via Firebase Auth
+                    userRepository.sendPasswordReset(email.value)
+                    _forgetPasswordResult.value = RequestResult.Success(
+                        "Enlace de recuperación enviado a ${email.value}. Revisa tu bandeja de entrada."
+                    )
+                } catch (e: Exception) {
+                    _forgetPasswordResult.value = RequestResult.Failure(
+                        "No se pudo enviar el enlace. Verifica que el correo esté registrado."
+                    )
                 }
             }
         }
