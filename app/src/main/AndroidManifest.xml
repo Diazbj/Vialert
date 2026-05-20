@@ -19,11 +19,6 @@
         android:theme="@style/Theme.MyApplication"
         android:name=".MyApp">
 
-        <!-- Mapbox Access Token -->
-        <meta-data
-            android:name="com.mapbox.maps.ACCESS_TOKEN"
-            android:value="@string/mapbox_access_token" />
-
         <activity
             android:name="com.example.myapplication.MainActivity"
             android:exported="true"
