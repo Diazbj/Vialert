@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.core.navigation.ReportDetail
+import com.example.myapplication.features.assistant.VirtualAssistantBottomSheet
 import com.example.myapplication.features.homeuser.components.MainLayout
 import com.example.myapplication.features.homeuser.components.ReportList
 
@@ -17,11 +18,16 @@ fun HomeUserScreen(
     navController: NavController? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showAssistant by remember { mutableStateOf(false) }
+
+    if (showAssistant) {
+        VirtualAssistantBottomSheet(onDismiss = { showAssistant = false })
+    }
 
     MainLayout(
         navController = navController,
         showSupportFab = true,
-        onSupportClick = viewModel::onSupportAction
+        onSupportClick = { showAssistant = true }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -33,6 +39,7 @@ fun HomeUserScreen(
             ReportList(
                 reports = uiState.reports,
                 reportTimes = uiState.reportTimes,
+                currentUserId = uiState.currentUserId,
                 onImportantClick = { reportId ->
                     viewModel.onImportantClick(reportId)
                 },

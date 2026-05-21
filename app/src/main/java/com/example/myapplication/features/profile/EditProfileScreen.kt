@@ -1,9 +1,12 @@
 package com.example.myapplication.features.profile
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +19,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.example.myapplication.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,8 +55,15 @@ fun EditProfileScreen(
     var fullName by remember { mutableStateOf("${user.firstName} ${user.lastName}".trim()) }
     var phone by remember { mutableStateOf(user.phone) }
     var bio by remember { mutableStateOf(user.bio) }
-
     var showPasswordDialog by remember { mutableStateOf(false) }
+
+    val isUploadingPhoto by remember { derivedStateOf { uiState.isUploadingPhoto } }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { viewModel.uploadProfilePhoto(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -80,23 +93,53 @@ fun EditProfileScreen(
             // Profile Picture with Camera Icon
             Box(
                 contentAlignment = Alignment.BottomEnd,
-                modifier = Modifier.size(100.dp)
+                modifier = Modifier
+                    .size(100.dp)
+                    .clickable(enabled = !isUploadingPhoto) { photoPickerLauncher.launch("image/*") }
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFFFE0B2),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(60.dp),
-                            tint = Color(0xFF8D6E63) 
+                if (user.profilePictureUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = user.profilePictureUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .border(2.dp, Color(0xFF7C3AED), CircleShape)
+                    )
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFFFE0B2),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp),
+                                tint = Color(0xFF8D6E63)
+                            )
+                        }
+                    }
+                }
+
+                if (isUploadingPhoto) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            color = Color.White,
+                            strokeWidth = 3.dp
                         )
                     }
                 }
-                
+
                 Surface(
                     shape = CircleShape,
                     color = Color(0xFF7C3AED),

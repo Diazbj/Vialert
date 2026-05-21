@@ -54,7 +54,10 @@ class SignUpViewModel @Inject constructor(
     val password = ValidatedField("") { value ->
         when {
             value.isEmpty() -> "La contraseña es obligatoria"
-            value.length < 6 -> "Debe tener mínimo 6 caracteres"
+            value.length < 6 -> "Mínimo 6 caracteres"
+            !value.any { it.isUpperCase() } -> "Debe incluir al menos 1 mayúscula"
+            !value.any { it.isLowerCase() } -> "Debe incluir al menos 1 minúscula"
+            !value.any { it.isDigit() } -> "Debe incluir al menos 1 número"
             else -> null
         }
     }

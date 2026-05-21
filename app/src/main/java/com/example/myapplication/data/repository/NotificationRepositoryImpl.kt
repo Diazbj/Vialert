@@ -1,59 +1,19 @@
 package com.example.myapplication.data.repository
 
 import com.example.myapplication.domain.model.Notification
-import com.example.myapplication.domain.model.TipoNotificacion
 import com.example.myapplication.domain.repository.NotificationRepository
-import java.time.LocalDateTime
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Stub kept for Hilt graph consistency — replaced by NotificationFirebaseRepositoryImpl
 @Singleton
 class NotificationRepositoryImpl @Inject constructor() : NotificationRepository {
-    private val items = mutableListOf<Notification>()
-
-    init {
-        items.addAll(listOf(
-            Notification(
-                id = "n1",
-                tipo = TipoNotificacion.REPORTE_CREADO,
-                titulo = "Nuevo reporte",
-                mensaje = "Se ha creado un nuevo reporte en tu zona.",
-                reporteId = "101",
-                creadoEn = LocalDateTime.now().minusDays(1),
-                creadoPorId = "1"
-            ),
-            Notification(
-                id = "n2",
-                tipo = TipoNotificacion.REPORTE_COMENTARIO,
-                titulo = "Nuevo comentario",
-                mensaje = "Alguien comentó en tu reporte.",
-                reporteId = "101",
-                creadoEn = LocalDateTime.now().minusMinutes(10),
-                creadoPorId = "2"
-            )
-        ))
-    }
-
-    override fun getAll(): List<Notification> = items.toList()
-
-    override fun getById(id: String): Notification? = items.find { it.id == id }
-
-    override fun create(notification: Notification) {
-        items.add(notification)
-    }
-
-    override fun update(notification: Notification) {
-        val index = items.indexOfFirst { it.id == notification.id }
-        if (index != -1) {
-            items[index] = notification
-        }
-    }
-
-    override fun delete(id: String) {
-        items.removeAll { it.id == id }
-    }
-
-    override fun getByReportId(reportId: String): List<Notification> {
-        return items.filter { it.reporteId == reportId }
-    }
+    private val empty = MutableStateFlow<List<Notification>>(emptyList())
+    override fun getForUser(userId: String): StateFlow<List<Notification>> = empty.asStateFlow()
+    override suspend fun markAsRead(notifId: String) = Unit
+    override suspend fun markAllAsRead(userId: String) = Unit
+    override suspend fun create(notification: Notification) = Unit
 }

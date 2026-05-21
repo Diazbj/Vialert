@@ -10,5 +10,6 @@ data class Report(
     val photoUrl: String = "",
     val ownerId: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val important: Int = 0
+    val important: Int = 0,
+    val importantBy: List<String> = emptyList()
 )

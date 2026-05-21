@@ -51,7 +51,9 @@ class ReportFirebaseRepositoryImpl @Inject constructor(
                                     photoUrl = doc.getString("photoUrl") ?: "",
                                     ownerId = doc.getString("ownerId") ?: "",
                                     createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis(),
-                                    important = (doc.getLong("important") ?: 0L).toInt()
+                                    important = (doc.getLong("important") ?: 0L).toInt(),
+                                    importantBy = (doc.get("importantBy") as? List<*>)
+                                        ?.filterIsInstance<String>() ?: emptyList()
                                 )
                             } catch (e: Exception) { null }
                         }
@@ -104,8 +106,18 @@ class ReportFirebaseRepositoryImpl @Inject constructor(
 
     override fun getByUserId(userId: String): List<Report> = _reports.value.filter { it.ownerId == userId }
 
-    override suspend fun incrementarImportancia(id: String) {
-        val current = getById(id)?.important ?: 0
-        collection.document(id).update("important", current + 1).await()
+    override suspend fun incrementarImportancia(id: String, userId: String) {
+        val docRef = collection.document(id)
+        firestore.runTransaction { transaction ->
+            val snap = transaction.get(docRef)
+            val voters = (snap.get("importantBy") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+            if (userId !in voters) {
+                val current = snap.getLong("important")?.toInt() ?: 0
+                transaction.update(docRef, mapOf(
+                    "important" to current + 1,
+                    "importantBy" to voters + userId
+                ))
+            }
+        }.await()
     }
 }

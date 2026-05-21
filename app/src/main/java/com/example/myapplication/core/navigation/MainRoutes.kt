@@ -18,6 +18,9 @@ data object ForgetPassword : MainRoutes()
 data object ResetPassword : MainRoutes()
 
 @Serializable
+data object RegistrationSuccess : MainRoutes()
+
+@Serializable
 data object HomeUser : MainRoutes()
 
 @Serializable
@@ -52,5 +55,17 @@ data object AdminDataAnalysis : MainRoutes()
 
 @Serializable
 data object AdminReportModeration : MainRoutes()
+
+@Serializable
+data object AdminUsers : MainRoutes()
+
+@Serializable
+data object AdminCategories : MainRoutes()
+
+@Serializable
+data object AdminSettings : MainRoutes()
+
+@Serializable
+data object AdminSystemReport : MainRoutes()
 
 sealed class MainRoutes

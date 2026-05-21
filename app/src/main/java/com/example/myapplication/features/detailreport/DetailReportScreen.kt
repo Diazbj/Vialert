@@ -1,5 +1,8 @@
 package com.example.myapplication.features.detailreport
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -30,6 +34,12 @@ import com.example.myapplication.domain.model.Comment
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.domain.model.ReportStatus
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapView
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +89,7 @@ fun DetailReportScreen(
                     }
                     
                     item {
-                        LocationSection()
+                        LocationSection(report)
                     }
                     
                     item {
@@ -201,31 +211,87 @@ fun ImportanceSection(count: Int) {
 }
 
 @Composable
-fun LocationSection() {
+fun LocationSection(report: Report) {
+    val lat = report.location.latitude
+    val lng = report.location.longitude
+    val hasLocation = lat != 0.0 || lng != 0.0
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(R.string.detail_report_location_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-        
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
+
+        if (hasLocation) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                AndroidView(
+                    factory = { ctx ->
+                        MapView(ctx).apply {
+                            mapboxMap.setCamera(
+                                CameraOptions.Builder()
+                                    .center(Point.fromLngLat(lng, lat))
+                                    .zoom(15.0)
+                                    .build()
+                            )
+                            mapboxMap.loadStyle("mapbox://styles/mapbox/streets-v12") { _ ->
+                                val manager = annotations.createPointAnnotationManager()
+                                manager.create(
+                                    PointAnnotationOptions()
+                                        .withPoint(Point.fromLngLat(lng, lat))
+                                        .withIconImage(createPinBitmap())
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             Text(
-                text = stringResource(R.string.detail_report_map_coming_soon),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
+                text = "Lat: ${"%.5f".format(lat)}, Lng: ${"%.5f".format(lng)}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.detail_report_map_coming_soon),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
         }
-        
+
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
     }
+}
+
+private fun createPinBitmap(): Bitmap {
+    val size = 48
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.parseColor("#7C3AED")
+    }
+    val white = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+    }
+    canvas.drawCircle(size / 2f, size / 2f, size / 2f, fill)
+    canvas.drawCircle(size / 2f, size / 2f, size / 5f, white)
+    return bitmap
 }
 
 @Composable

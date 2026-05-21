@@ -30,6 +30,7 @@ fun ReportCard(
     report: Report,
     timeLabel: String,
     importantCount: Int,
+    hasVoted: Boolean,
     onImportantClick: (Report) -> Unit,
     onShareClick: (Report) -> Unit,
     modifier: Modifier = Modifier
@@ -116,13 +117,21 @@ fun ReportCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = { onImportantClick(report) },
+                    onClick = { if (!hasVoted) onImportantClick(report) },
+                    enabled = !hasVoted,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6A1B9A),
-                        contentColor = Color.White
+                        containerColor = if (hasVoted) Color(0xFF6A1B9A).copy(alpha = 0.5f) else Color(0xFF6A1B9A),
+                        disabledContainerColor = Color(0xFF6A1B9A).copy(alpha = 0.5f),
+                        contentColor = Color.White,
+                        disabledContentColor = Color.White
                     )
                 ) {
-                    Text(text = stringResource(id = R.string.home_user_report_important, importantCount))
+                    Text(
+                        text = if (hasVoted)
+                            "✓ Importante ($importantCount)"
+                        else
+                            stringResource(id = R.string.home_user_report_important, importantCount)
+                    )
                 }
 
                 IconButton(

@@ -10,9 +10,12 @@ import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.data.datastore.SessionDataStore
 import com.example.myapplication.data.service.ImageUploadService
 import com.example.myapplication.domain.model.Location
+import com.example.myapplication.domain.model.Notification
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.domain.model.ReportStatus
+import com.example.myapplication.domain.model.TipoNotificacion
+import com.example.myapplication.domain.repository.NotificationRepository
 import com.example.myapplication.domain.repository.ReportRepository
 import com.example.myapplication.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,6 +49,7 @@ data class NewReportUiState(
 class NewReportViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
     private val userRepository: UserRepository,
+    private val notificationRepository: NotificationRepository,
     private val sessionDataStore: SessionDataStore,
     private val imageUploadService: ImageUploadService,
     savedStateHandle: SavedStateHandle
@@ -158,6 +162,17 @@ class NewReportViewModel @Inject constructor(
                         if (user != null) {
                             userRepository.update(user.copy(score = user.score + 10))
                         }
+                        notificationRepository.create(
+                            Notification(
+                                tipo = TipoNotificacion.REPORTE_CREADO,
+                                titulo = "Reporte publicado",
+                                mensaje = "Tu reporte \"${current.title}\" fue publicado exitosamente.",
+                                reporteId = newReport.id,
+                                destinatarioId = ownerId,
+                                creadoEn = System.currentTimeMillis(),
+                                creadoPorId = ownerId
+                            )
+                        )
                     }
 
                     _submitResult.value = RequestResult.Success("Reporte publicado exitosamente (+10 pts)")

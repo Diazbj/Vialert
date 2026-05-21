@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.features.home.HomeScreen
 import com.example.myapplication.features.login.LoginScreen
+import com.example.myapplication.features.signup.RegistrationSuccessScreen
 import com.example.myapplication.features.signup.SignUpScreen
 import com.example.myapplication.features.forgetPassword.ForgetPasswordScreen
 
@@ -41,6 +42,16 @@ fun AuthNavigation() {
                 navController = navController,
                 onNavigateToBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable<RegistrationSuccess> {
+            RegistrationSuccessScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Login) {
+                        popUpTo(Home) { inclusive = false }
+                    }
                 }
             )
         }

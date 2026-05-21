@@ -11,5 +11,5 @@ interface ReportRepository {
     suspend fun update(report: Report)
     suspend fun delete(id: String)
     fun getByUserId(userId: String): List<Report>
-    suspend fun incrementarImportancia(id: String)
+    suspend fun incrementarImportancia(id: String, userId: String)
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.model.Report
+import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.repository.ReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ class ExploreViewModel @Inject constructor(
 ) : ViewModel() {
 
     val searchQuery = mutableStateOf("")
-    val isSearching = mutableStateOf(false)
+
+    private var allReports: List<Report> = emptyList()
 
     private val _filteredReports = MutableStateFlow<List<Report>>(emptyList())
     val filteredReports: StateFlow<List<Report>> = _filteredReports.asStateFlow()
@@ -26,32 +28,24 @@ class ExploreViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             reportRepository.reports.collect { all ->
-                _filteredReports.value = all
+                allReports = all.filter { it.status != ReportStatus.DELETED }
+                applyFilter()
             }
         }
     }
 
     fun onSearchQueryChange(query: String) {
         searchQuery.value = query
-        filterReports(query)
+        applyFilter()
     }
 
-    fun onSearch() {
-        filterReports(searchQuery.value)
-    }
-
-    private fun filterReports(query: String) {
-        val all = reportRepository.getAll()
-        _filteredReports.value = if (query.isBlank()) all
-        else all.filter {
+    private fun applyFilter() {
+        val query = searchQuery.value.trim()
+        _filteredReports.value = if (query.isBlank()) allReports
+        else allReports.filter {
             it.title.contains(query, ignoreCase = true) ||
             it.description.contains(query, ignoreCase = true) ||
             it.type.contains(query, ignoreCase = true)
         }
-    }
-
-    fun clearSearch() {
-        searchQuery.value = ""
-        _filteredReports.value = reportRepository.getAll()
     }
 }

@@ -1,12 +1,11 @@
 package com.example.myapplication.domain.repository
 
 import com.example.myapplication.domain.model.Notification
+import kotlinx.coroutines.flow.StateFlow
 
 interface NotificationRepository {
-    fun getAll(): List<Notification>
-    fun getById(id: String): Notification?
-    fun create(notification: Notification)
-    fun update(notification: Notification)
-    fun delete(id: String)
-    fun getByReportId(reportId: String): List<Notification>
+    fun getForUser(userId: String): StateFlow<List<Notification>>
+    suspend fun markAsRead(notifId: String)
+    suspend fun markAllAsRead(userId: String)
+    suspend fun create(notification: Notification)
 }

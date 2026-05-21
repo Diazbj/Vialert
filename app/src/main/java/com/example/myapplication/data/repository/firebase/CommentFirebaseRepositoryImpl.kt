@@ -3,13 +3,9 @@ package com.example.myapplication.data.repository.firebase
 import com.example.myapplication.domain.model.Comment
 import com.example.myapplication.domain.repository.CommentRepository
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDateTime
@@ -22,41 +18,34 @@ class CommentFirebaseRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : CommentRepository {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val collection = firestore.collection("comments")
+    private val reportFlows = mutableMapOf<String, MutableStateFlow<List<Comment>>>()
 
-    // Cache local para lectura sincrónica
-    private var cachedComments: List<Comment> = emptyList()
-
-    init {
-        callbackFlow {
-            val listener = collection
-                .orderBy("createdAt")
-                .addSnapshotListener { snapshot, _ ->
-                    snapshot?.let {
-                        val list = it.documents.mapNotNull { doc ->
-                            try {
-                                val timestamp = doc.getLong("createdAt") ?: System.currentTimeMillis()
-                                val dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
+    override fun getByReportId(reportId: String): StateFlow<List<Comment>> {
+        return reportFlows.getOrPut(reportId) {
+            MutableStateFlow<List<Comment>>(emptyList()).also { flow ->
+                collection
+                    .whereEqualTo("reportId", reportId)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null || snapshot == null) return@addSnapshotListener
+                        flow.value = snapshot.documents.mapNotNull { doc ->
+                            runCatching {
+                                val ts = doc.getLong("createdAt") ?: System.currentTimeMillis()
                                 Comment(
                                     id = doc.id,
                                     reportId = doc.getString("reportId") ?: "",
                                     userId = doc.getString("userId") ?: "",
                                     content = doc.getString("content") ?: "",
-                                    createdAt = dateTime
+                                    createdAt = LocalDateTime.ofInstant(
+                                        Instant.ofEpochMilli(ts), ZoneId.systemDefault()
+                                    )
                                 )
-                            } catch (e: Exception) { null }
-                        }
-                        trySend(list)
+                            }.getOrNull()
+                        }.sortedByDescending { it.createdAt }
                     }
-                }
-            awaitClose { listener.remove() }
-        }.onEach { cachedComments = it }.launchIn(scope)
+            }
+        }
     }
-
-    override fun getAll(): List<Comment> = cachedComments
-
-    override fun getById(id: String): Comment? = cachedComments.find { it.id == id }
 
     override suspend fun create(comment: Comment) {
         val data = mapOf(
@@ -68,13 +57,8 @@ class CommentFirebaseRepositoryImpl @Inject constructor(
         collection.add(data).await()
     }
 
-    override fun update(comment: Comment) {
-        collection.document(comment.id).update("content", comment.content)
-    }
-
-    override fun delete(id: String) {
-        collection.document(id).delete()
-    }
-
-    override fun getByReportId(reportId: String): List<Comment> = cachedComments.filter { it.reportId == reportId }
+    override fun getAll(): List<Comment> = reportFlows.values.flatMap { it.value }
+    override fun getById(id: String): Comment? = getAll().find { it.id == id }
+    override fun update(comment: Comment) { collection.document(comment.id).update("content", comment.content) }
+    override fun delete(id: String) { collection.document(id).delete() }
 }

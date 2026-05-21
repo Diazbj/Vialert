@@ -5,11 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.myapplication.core.navigation.ReportDetail
-import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.data.datastore.SessionDataStore
 import com.example.myapplication.domain.model.Comment
 import com.example.myapplication.domain.model.Report
-import com.example.myapplication.domain.model.User
 import com.example.myapplication.domain.repository.CommentRepository
 import com.example.myapplication.domain.repository.ReportRepository
 import com.example.myapplication.domain.repository.UserRepository
@@ -42,39 +40,31 @@ class DetailReportViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val reportRoute = savedStateHandle.toRoute<ReportDetail>()
-    private val reportId = reportRoute.reportId
+    private val reportId = savedStateHandle.toRoute<ReportDetail>().reportId
 
     private val _uiState = MutableStateFlow(DetailReportUiState())
     val uiState: StateFlow<DetailReportUiState> = _uiState.asStateFlow()
 
     init {
-        loadData()
+        loadReport()
+        observeComments()
     }
 
-    private fun loadData() {
+    private fun loadReport() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                val report = reportRepository.getById(reportId)
-                val comments = commentRepository.getByReportId(reportId)
-                
-                // Cargar nombres de usuarios para los comentarios
-                val userIds = comments.map { it.userId }.distinct()
-                val namesMap = userIds.associateWith { id ->
-                    userRepository.getById(id)?.firstName ?: "Usuario $id"
-                }
+            val report = reportRepository.getById(reportId)
+            _uiState.update { it.copy(report = report, isLoading = false) }
+        }
+    }
 
-                _uiState.update { 
-                    it.copy(
-                        report = report, 
-                        comments = comments.sortedByDescending { c -> c.createdAt }, 
-                        userNames = namesMap,
-                        isLoading = false 
-                    ) 
+    private fun observeComments() {
+        viewModelScope.launch {
+            commentRepository.getByReportId(reportId).collect { comments ->
+                val namesMap = comments.map { it.userId }.distinct().associateWith { id ->
+                    userRepository.getById(id)?.let { "${it.firstName} ${it.lastName}".trim() } ?: "Usuario"
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(comments = comments, userNames = namesMap) }
             }
         }
     }
@@ -84,38 +74,22 @@ class DetailReportViewModel @Inject constructor(
     }
 
     fun addComment() {
-        val currentText = _uiState.value.commentText
-        if (currentText.isBlank()) return
+        val text = _uiState.value.commentText.trim()
+        if (text.isBlank()) return
 
         viewModelScope.launch {
             try {
-                val session = sessionDataStore.sessionFlow.firstOrNull()
-                val userId = session?.userId ?: "anonymous"
-
-                val newComment = Comment(
-                    id = UUID.randomUUID().toString(),
-                    reportId = reportId,
-                    userId = userId,
-                    content = currentText,
-                    createdAt = LocalDateTime.now()
+                val userId = sessionDataStore.sessionFlow.firstOrNull()?.userId ?: "anonymous"
+                commentRepository.create(
+                    Comment(
+                        id = UUID.randomUUID().toString(),
+                        reportId = reportId,
+                        userId = userId,
+                        content = text,
+                        createdAt = LocalDateTime.now()
+                    )
                 )
-
-                commentRepository.create(newComment)
-                
-                // Actualizar comentarios y nombres
-                val updatedComments = commentRepository.getByReportId(reportId)
-                val userIds = updatedComments.map { it.userId }.distinct()
-                val namesMap = userIds.associateWith { id ->
-                    userRepository.getById(id)?.firstName ?: "Usuario $id"
-                }
-
-                _uiState.update { 
-                    it.copy(
-                        comments = updatedComments.sortedByDescending { c -> c.createdAt },
-                        userNames = namesMap,
-                        commentText = "" 
-                    ) 
-                }
+                _uiState.update { it.copy(commentText = "") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Error al agregar comentario") }
             }

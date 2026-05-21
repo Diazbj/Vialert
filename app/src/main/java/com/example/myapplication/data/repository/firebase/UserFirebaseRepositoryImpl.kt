@@ -74,6 +74,9 @@ class UserFirebaseRepositoryImpl @Inject constructor(
         val authResult = auth.createUserWithEmailAndPassword(user.email, user.password).await()
         val uid = authResult.user?.uid ?: throw Exception("No se pudo crear el usuario")
 
+        // Enviar correo de verificación antes de guardar en Firestore
+        authResult.user?.sendEmailVerification()?.await()
+
         // Guardar datos del usuario en Firestore (sin contraseña)
         val data = mapOf(
             "firstName" to user.firstName,
@@ -89,6 +92,9 @@ class UserFirebaseRepositoryImpl @Inject constructor(
             "role" to user.role.name
         )
         collection.document(uid).set(data).await()
+
+        // Cerrar sesión para que el usuario deba verificar su correo antes de ingresar
+        auth.signOut()
     }
 
     override suspend fun update(user: User) {

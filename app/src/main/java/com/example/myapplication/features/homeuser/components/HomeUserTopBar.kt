@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,19 +32,31 @@ fun HomeUserTopBar(
     title: String,
     showNotificationsAction: Boolean,
     onTitleClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White // Fondo homogéneo (blanco)
+            containerColor = Color.White
         ),
+        navigationIcon = {
+            if (onNavigateBack != null) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = Color(0xFF6A1B9A)
+                    )
+                }
+            }
+        },
         title = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
                 fontSize = 28.sp,
                 color = Color(0xFF6A1B9A),
-                modifier = Modifier.clickable(onClick = onTitleClick)
+                modifier = if (onNavigateBack == null) Modifier.clickable(onClick = onTitleClick) else Modifier
             )
         },
         actions = {
@@ -56,11 +69,11 @@ fun HomeUserTopBar(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF6A1B9A).copy(alpha = 0.1f)), // Círculo de fondo suave
+                            .background(Color(0xFF6A1B9A).copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Notifications, // Icono Outline
+                            imageVector = Icons.Outlined.Notifications,
                             contentDescription = stringResource(id = R.string.home_user_notifications_content_description),
                             tint = Color(0xFF6A1B9A),
                             modifier = Modifier.size(24.dp)

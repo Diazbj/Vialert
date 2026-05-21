@@ -1,10 +1,12 @@
 package com.example.myapplication.features.profile
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.datastore.SessionDataStore
+import com.example.myapplication.data.service.ImageUploadService
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.model.User
@@ -32,14 +34,18 @@ data class ProfileUiState(
     val stats: ProfileStats = ProfileStats(),
     val pointsProgress: Float = 0f,
     val myReports: List<Report> = emptyList(),
-    val allUsers: List<User> = emptyList()
+    val allUsers: List<User> = emptyList(),
+    val allReports: List<Report> = emptyList(),
+    val isUploadingPhoto: Boolean = false,
+    val photoUploadError: String? = null
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reportRepository: ReportRepository,
-    private val sessionDataStore: SessionDataStore
+    private val sessionDataStore: SessionDataStore,
+    private val imageUploadService: ImageUploadService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -62,12 +68,13 @@ class ProfileViewModel @Inject constructor(
                 val currentUserId = session?.userId ?: ""
                 val user = allUsers.find { it.id == currentUserId }
                 val myReports = allReports.filter { it.ownerId == currentUserId }
-                
-                ObservedData(user, myReports, allUsers)
+
+                ObservedData(user, myReports, allUsers, allReports)
             }.collect { data ->
                 val user = data.user
                 val myReports = data.myReports
                 val allUsers = data.allUsers
+                val allReports = data.allReports
                 if (user != null) {
                     val level = UserLevel.fromScore(user.score)
                     val pointsInLevel = user.score - level.minPoints
@@ -85,7 +92,8 @@ class ProfileViewModel @Inject constructor(
                                 resolved = myReports.count { it.status == ReportStatus.RESOLVED }
                             ),
                             myReports = myReports,
-                            allUsers = allUsers
+                            allUsers = allUsers,
+                            allReports = allReports
                         )
                     }
 
@@ -130,6 +138,20 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun uploadProfilePhoto(uri: Uri) {
+        val currentUser = _uiState.value.user ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isUploadingPhoto = true, photoUploadError = null) }
+            try {
+                val url = imageUploadService.uploadProfileImage(uri, currentUser.id)
+                userRepository.update(currentUser.copy(profilePictureUrl = url))
+                _uiState.update { it.copy(isUploadingPhoto = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isUploadingPhoto = false, photoUploadError = e.message) }
+            }
+        }
+    }
+
     fun changePassword(currentPass: String, newPass: String): Boolean {
         // Con Firebase Auth la contraseña no se almacena localmente, siempre se puede cambiar
         if (newPass.length >= 6) {
@@ -153,5 +175,6 @@ data class Achievement(
 private data class ObservedData(
     val user: User?,
     val myReports: List<Report>,
-    val allUsers: List<User>
+    val allUsers: List<User>,
+    val allReports: List<Report>
 )

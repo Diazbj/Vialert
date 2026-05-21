@@ -33,9 +33,11 @@ class ReportRepositoryImpl @Inject constructor() : ReportRepository {
 
     override fun getByUserId(userId: String): List<Report> = _reports.value.filter { it.ownerId == userId }
 
-    override suspend fun incrementarImportancia(id: String) {
+    override suspend fun incrementarImportancia(id: String, userId: String) {
         _reports.value = _reports.value.map {
-            if (it.id == id) it.copy(important = it.important + 1) else it
+            if (it.id == id && userId !in it.importantBy)
+                it.copy(important = it.important + 1, importantBy = it.importantBy + userId)
+            else it
         }
     }
 

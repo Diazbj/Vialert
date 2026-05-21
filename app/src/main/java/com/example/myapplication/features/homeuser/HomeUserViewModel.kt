@@ -3,6 +3,7 @@ package com.example.myapplication.features.homeuser
 import android.text.format.DateUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.datastore.SessionDataStore
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportStatus
 import com.example.myapplication.domain.repository.ReportRepository
@@ -11,29 +12,37 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeUserViewModel @Inject constructor(
-    private val reportRepository: ReportRepository
+    private val reportRepository: ReportRepository,
+    private val sessionDataStore: SessionDataStore
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUserUiState(userName = "Juan"))
+    private val _uiState = MutableStateFlow(HomeUserUiState())
     val uiState: StateFlow<HomeUserUiState> = _uiState.asStateFlow()
 
     init {
+        loadCurrentUser()
         observeReports()
         startTimer()
+    }
+
+    private fun loadCurrentUser() {
+        viewModelScope.launch {
+            val session = sessionDataStore.sessionFlow.firstOrNull()
+            _uiState.update { it.copy(currentUserId = session?.userId ?: "") }
+        }
     }
 
     private fun observeReports() {
         viewModelScope.launch {
             reportRepository.reports.collect { allReports ->
-                // Filtrar reportes eliminados para el Home
                 val activeReports = allReports.filter { it.status != ReportStatus.DELETED }
-                
                 _uiState.update { state ->
                     state.copy(
                         reports = activeReports,
@@ -68,18 +77,18 @@ class HomeUserViewModel @Inject constructor(
     }
 
     fun onImportantClick(reportId: String) {
+        val userId = _uiState.value.currentUserId
+        if (userId.isBlank()) return
         viewModelScope.launch {
-            reportRepository.incrementarImportancia(reportId)
+            reportRepository.incrementarImportancia(reportId, userId)
         }
     }
 
-    fun onSupportAction() {
-        // Reserved for future support center integration.
-    }
+    fun onSupportAction() {}
 }
 
 data class HomeUserUiState(
-    val userName: String = "",
+    val currentUserId: String = "",
     val reports: List<Report> = emptyList(),
     val reportTimes: Map<String, String> = emptyMap()
 )

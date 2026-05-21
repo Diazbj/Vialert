@@ -15,6 +15,7 @@ import com.example.myapplication.domain.model.Report
 fun ReportList(
     reports: List<Report>,
     reportTimes: Map<String, String>,
+    currentUserId: String,
     onImportantClick: (String) -> Unit,
     onShareClick: (Report) -> Unit,
     onReportClick: (Report) -> Unit,
@@ -31,9 +32,8 @@ fun ReportList(
                 report = report,
                 timeLabel = reportTimes[report.id].orEmpty(),
                 importantCount = report.important,
-                onImportantClick = { reportToIncrement -> 
-                    onImportantClick(reportToIncrement.id) 
-                },
+                hasVoted = currentUserId.isNotBlank() && currentUserId in report.importantBy,
+                onImportantClick = { onImportantClick(it.id) },
                 onShareClick = onShareClick,
                 modifier = Modifier.clickable { onReportClick(report) }
             )

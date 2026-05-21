@@ -22,6 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.core.navigation.AdminCategories
+import com.example.myapplication.core.navigation.AdminDataAnalysis
+import com.example.myapplication.core.navigation.AdminReportModeration
+import com.example.myapplication.core.navigation.AdminSettings
+import com.example.myapplication.core.navigation.AdminSystemReport
+import com.example.myapplication.core.navigation.AdminUsers
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,13 +70,15 @@ fun AdminControlPanelScreen(navController: NavController? = null) {
                     icon = Icons.Default.Group,
                     title = stringResource(R.string.admin_panel_func_users_title),
                     subtitle = stringResource(R.string.admin_panel_func_users_subtitle),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController?.navigate(AdminUsers) }
                 )
                 AdminFuncCard(
                     icon = Icons.Default.Settings,
                     title = stringResource(R.string.admin_panel_func_settings_title),
                     subtitle = stringResource(R.string.admin_panel_func_settings_subtitle),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController?.navigate(AdminSettings) }
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -80,13 +88,14 @@ fun AdminControlPanelScreen(navController: NavController? = null) {
                     title = stringResource(R.string.admin_panel_func_reports_title),
                     subtitle = stringResource(R.string.admin_panel_func_reports_subtitle),
                     modifier = Modifier.weight(1f),
-                    onClick = { navController?.navigate(com.example.myapplication.core.navigation.AdminReportModeration) }
+                    onClick = { navController?.navigate(AdminReportModeration) }
                 )
                 AdminFuncCard(
                     icon = Icons.Default.Category,
                     title = stringResource(R.string.admin_panel_func_categories_title),
                     subtitle = stringResource(R.string.admin_panel_func_categories_subtitle),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController?.navigate(AdminCategories) }
                 )
             }
 
@@ -99,7 +108,7 @@ fun AdminControlPanelScreen(navController: NavController? = null) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { navController?.navigate(com.example.myapplication.core.navigation.AdminDataAnalysis) }
+                    .clickable { navController?.navigate(AdminSystemReport) }
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -147,7 +156,7 @@ fun AdminControlPanelScreen(navController: NavController? = null) {
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
-                        onClick = { },
+                        onClick = { navController?.navigate(AdminSystemReport) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),

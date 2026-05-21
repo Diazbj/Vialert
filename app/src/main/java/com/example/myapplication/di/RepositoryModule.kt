@@ -1,9 +1,9 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.CommentRepositoryImpl
-import com.example.myapplication.data.repository.NotificationRepositoryImpl
 import com.example.myapplication.data.repository.NotificacionUsuarioRepositoryImpl
 import com.example.myapplication.data.repository.firebase.CommentFirebaseRepositoryImpl
+import com.example.myapplication.data.repository.firebase.NotificationFirebaseRepositoryImpl
 import com.example.myapplication.data.repository.firebase.ReportFirebaseRepositoryImpl
 import com.example.myapplication.data.repository.firebase.UserFirebaseRepositoryImpl
 import com.example.myapplication.domain.repository.CommentRepository
@@ -42,7 +42,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindNotificationRepository(
-        notificationRepositoryImpl: NotificationRepositoryImpl
+        notificationFirebaseRepositoryImpl: NotificationFirebaseRepositoryImpl
     ): NotificationRepository
 
     @Binds

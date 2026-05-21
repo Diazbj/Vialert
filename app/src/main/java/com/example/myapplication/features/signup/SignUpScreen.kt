@@ -1,10 +1,13 @@
 package com.example.myapplication.features.signup
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,8 +22,14 @@ import com.example.myapplication.R
 import com.example.myapplication.core.components.ResultDialog
 import com.example.myapplication.core.components.VialertPasswordField
 import com.example.myapplication.core.components.VialertTextField
+import com.example.myapplication.core.navigation.RegistrationSuccess
+import com.example.myapplication.core.navigation.SignUp
 import com.example.myapplication.core.utils.RequestResult
 import com.example.myapplication.domain.model.Gender
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,18 +40,44 @@ fun SignUpScreen(
 ) {
     val registerResult by viewModel.registerResult.collectAsState()
     var isGenderMenuExpanded by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = null)
 
-    // El diálogo se muestra basándose directamente en el estado del registerResult
-    ResultDialog(
-        result = registerResult,
-        onDismiss = {
-            if (registerResult is RequestResult.Success) {
-                viewModel.resetForm()
-                //onNavigateToBack()
-            } else {
-                viewModel.clearResult()
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        sdf.timeZone = TimeZone.getTimeZone("UTC")
+                        viewModel.birthDate.onChange(sdf.format(Date(millis)))
+                    }
+                    showDatePicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    // Navegar a pantalla de éxito cuando el registro termina correctamente
+    LaunchedEffect(registerResult) {
+        if (registerResult is RequestResult.Success) {
+            viewModel.resetForm()
+            navController?.navigate(RegistrationSuccess) {
+                popUpTo(SignUp) { inclusive = true }
             }
         }
+    }
+
+    // Mostrar dialog solo para errores
+    ResultDialog(
+        result = if (registerResult is RequestResult.Failure) registerResult else null,
+        onDismiss = { viewModel.clearResult() }
     )
 
     Column(
@@ -193,15 +228,31 @@ fun SignUpScreen(
                 }
             }
 
-            VialertTextField(
-                value = viewModel.birthDate.value,
-                onValueChange = { viewModel.birthDate.onChange(it) },
-                label = stringResource(R.string.signup_label_birth_date),
-                placeholder = stringResource(R.string.signup_placeholder_birth_date),
-                isError = viewModel.birthDate.error != null,
-                supportingText = viewModel.birthDate.error,
-                modifier = Modifier.weight(1f)
-            )
+            Box(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = viewModel.birthDate.value,
+                    onValueChange = {},
+                    enabled = false,
+                    label = { Text(stringResource(R.string.signup_label_birth_date)) },
+                    placeholder = { Text(stringResource(R.string.signup_placeholder_birth_date)) },
+                    isError = viewModel.birthDate.error != null,
+                    supportingText = viewModel.birthDate.error?.let { { Text(it) } },
+                    trailingIcon = {
+                        Icon(Icons.Default.DateRange, contentDescription = null)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = Color.Black,
+                        disabledBorderColor = if (viewModel.birthDate.error != null)
+                            MaterialTheme.colorScheme.error else Color.Black,
+                        disabledLabelColor = Color.Black,
+                        disabledPlaceholderColor = Color.Black,
+                        disabledTrailingIconColor = Color.Black,
+                        errorBorderColor = MaterialTheme.colorScheme.error
+                    )
+                )
+                Box(modifier = Modifier.matchParentSize().clickable { showDatePicker = true })
+            }
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -227,7 +278,7 @@ fun SignUpScreen(
             onClick = {
                 viewModel.onSubmit()
             },
-            enabled = registerResult !is RequestResult.Loading,
+            enabled = viewModel.isFormValid && registerResult !is RequestResult.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),

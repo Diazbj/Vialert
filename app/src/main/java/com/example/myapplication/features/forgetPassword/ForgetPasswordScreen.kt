@@ -101,7 +101,7 @@ fun ForgetPasswordScreen(
             onClick = {
                 viewModel.onSubmit()
             },
-            enabled = forgetPasswordResult !is RequestResult.Loading,
+            enabled = viewModel.isFormValid && forgetPasswordResult !is RequestResult.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),

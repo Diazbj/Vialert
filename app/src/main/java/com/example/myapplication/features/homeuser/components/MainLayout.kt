@@ -32,6 +32,7 @@ fun MainLayout(
     showNotificationsAction: Boolean = true,
     showSupportFab: Boolean = false,
     onSupportClick: (() -> Unit)? = null,
+    onNavigateBack: (() -> Unit)? = null,
     content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit
 ) {
     val currentBackStackEntry = navController?.currentBackStackEntryAsState()?.value
@@ -54,7 +55,8 @@ fun MainLayout(
                 title = stringResource(id = topBarTitleRes),
                 showNotificationsAction = showNotificationsAction,
                 onTitleClick = { onNavigate(HomeUser) },
-                onNotificationsClick = { navController?.navigate(Notifications) }
+                onNotificationsClick = { navController?.navigate(Notifications) },
+                onNavigateBack = onNavigateBack
             )
         },
         bottomBar = {

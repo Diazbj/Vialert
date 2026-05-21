@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.domain.model.User
 import com.example.myapplication.domain.model.UserLevel
@@ -80,16 +82,28 @@ fun UserProfileContent(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.size(140.dp)
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFF1F5F9),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(80.dp), tint = Color.LightGray)
+                if (!user?.profilePictureUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user!!.profilePictureUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .border(3.dp, Color(0xFF7C3AED), CircleShape)
+                    )
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF1F5F9),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(80.dp), tint = Color.LightGray)
+                        }
                     }
                 }
-                
+
                 Surface(
                     shape = CircleShape,
                     color = Color(0xFFFFD700),
@@ -422,6 +436,14 @@ fun AdminProfileContent(
     navController: NavController?
 ) {
     val user = uiState.user
+    val activeReports = uiState.allReports.filter { it.status != com.example.myapplication.domain.model.ReportStatus.DELETED }
+    val totalReports = activeReports.size
+    val totalUsers = uiState.allUsers.size
+    val alertsCount = activeReports.count { it.status == com.example.myapplication.domain.model.ReportStatus.PENDING }
+    val resolvedCount = activeReports.count { it.status == com.example.myapplication.domain.model.ReportStatus.RESOLVED }
+    val resolutionPct = if (totalReports > 0) resolvedCount * 100 / totalReports else 0
+
+    fun formatCount(n: Int): String = if (n >= 1000) String.format("%.1fk", n / 1000.0) else n.toString()
 
     Scaffold(
         topBar = {
@@ -453,13 +475,25 @@ fun AdminProfileContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.size(120.dp)) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFF1F5F9),
-                    border = BorderStroke(4.dp, Color(0xFFF3E8FF)),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.padding(16.dp), tint = Color.LightGray)
+                if (!user?.profilePictureUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user!!.profilePictureUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .border(4.dp, Color(0xFFF3E8FF), CircleShape)
+                    )
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF1F5F9),
+                        border = BorderStroke(4.dp, Color(0xFFF3E8FF)),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.padding(16.dp), tint = Color.LightGray)
+                    }
                 }
                 Surface(
                     shape = CircleShape,
@@ -522,9 +556,9 @@ fun AdminProfileContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AdminStatCard(title = stringResource(R.string.profile_admin_stat_reports), value = "124", icon = Icons.Default.InsertChartOutlined, iconTint = Color(0xFF9333EA), iconBg = Color(0xFFF3E8FF), modifier = Modifier.weight(1f), onClick = { navController?.navigate(com.example.myapplication.core.navigation.AdminDataAnalysis) })
-                AdminStatCard(title = stringResource(R.string.profile_admin_stat_users), value = "1.2k", icon = Icons.Default.PeopleAlt, iconTint = Color(0xFF7C3AED), iconBg = Color(0xFFF3E8FF), modifier = Modifier.weight(1f))
-                AdminStatCard(title = stringResource(R.string.profile_admin_stat_alerts), value = "8", icon = Icons.Default.WarningAmber, iconTint = Color(0xFFEF4444), iconBg = Color(0xFFFEE2E2), modifier = Modifier.weight(1f))
+                AdminStatCard(title = stringResource(R.string.profile_admin_stat_reports), value = formatCount(totalReports), icon = Icons.Default.InsertChartOutlined, iconTint = Color(0xFF9333EA), iconBg = Color(0xFFF3E8FF), modifier = Modifier.weight(1f), onClick = { navController?.navigate(com.example.myapplication.core.navigation.AdminDataAnalysis) })
+                AdminStatCard(title = stringResource(R.string.profile_admin_stat_users), value = formatCount(totalUsers), icon = Icons.Default.PeopleAlt, iconTint = Color(0xFF7C3AED), iconBg = Color(0xFFF3E8FF), modifier = Modifier.weight(1f))
+                AdminStatCard(title = stringResource(R.string.profile_admin_stat_alerts), value = alertsCount.toString(), icon = Icons.Default.WarningAmber, iconTint = Color(0xFFEF4444), iconBg = Color(0xFFFEE2E2), modifier = Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -538,11 +572,11 @@ fun AdminProfileContent(
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(stringResource(R.string.profile_admin_resolution_title), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                        Text("92%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF7C3AED))
+                        Text("$resolutionPct%", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF7C3AED))
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     LinearProgressIndicator(
-                        progress = 0.92f,
+                        progress = { resolutionPct / 100f },
                         modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
                         color = Color(0xFF7C3AED),
                         trackColor = Color(0xFFE2E8F0)
