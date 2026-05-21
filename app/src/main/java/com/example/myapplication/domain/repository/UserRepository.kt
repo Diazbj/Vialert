@@ -15,4 +15,5 @@ interface UserRepository {
     suspend fun sendPasswordReset(email: String)
     fun signOut()
     fun getCurrentUserId(): String?
+    suspend fun deleteAccount(userId: String)
 }

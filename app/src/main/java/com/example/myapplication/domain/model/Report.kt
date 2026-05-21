@@ -11,5 +11,6 @@ data class Report(
     val ownerId: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val important: Int = 0,
-    val importantBy: List<String> = emptyList()
+    val importantBy: List<String> = emptyList(),
+    val rejectionReason: String = ""
 )

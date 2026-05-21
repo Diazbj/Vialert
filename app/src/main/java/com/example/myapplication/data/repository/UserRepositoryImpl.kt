@@ -47,6 +47,10 @@ class UserRepositoryImpl @Inject constructor() : UserRepository {
 
     override fun getCurrentUserId(): String? = null
 
+    override suspend fun deleteAccount(userId: String) {
+        delete(userId)
+    }
+
     private fun fetchUsers(): List<User> = listOf(
         User(id = "1", firstName = "Juan", lastName = "Perez", email = "juan@vialert.com", userName = "juanp", password = "password123", role = UserRole.USER),
         User(id = "2", firstName = "admin", lastName = "vialert", email = "admin@vialert.com", userName = "admin", password = "123456789", role = UserRole.ADMIN),

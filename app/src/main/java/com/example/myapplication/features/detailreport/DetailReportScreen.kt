@@ -34,6 +34,7 @@ import com.example.myapplication.domain.model.Comment
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportCategory
 import com.example.myapplication.domain.model.ReportStatus
+import com.example.myapplication.domain.model.SeverityLevel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
@@ -176,35 +177,81 @@ fun ReportContent(report: Report) {
 
 @Composable
 fun ImportanceSection(count: Int) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color(0xFF6A1B9A).copy(alpha = 0.1f),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    val severity = SeverityLevel.fromVotes(count)
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Sección de votos
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFF6A1B9A).copy(alpha = 0.1f),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text(
-                text = stringResource(R.string.detail_report_is_important),
-                color = Color(0xFF6A1B9A),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            
-            Surface(
-                color = Color(0xFF6A1B9A).copy(alpha = 0.3f),
-                shape = RoundedCornerShape(8.dp)
+            Row(
+                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = count.toString(),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    text = stringResource(R.string.detail_report_is_important),
+                    color = Color(0xFF6A1B9A),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6A1B9A)
+                    style = MaterialTheme.typography.bodyLarge
                 )
+                Surface(
+                    color = Color(0xFF6A1B9A).copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = count.toString(),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6A1B9A)
+                    )
+                }
+            }
+        }
+
+        // Nivel de severidad
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = severity.bgColor,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Nivel de severidad",
+                        fontSize = 11.sp,
+                        color = severity.color.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${severity.emoji} ${severity.label}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = severity.color
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Basado en $count votos",
+                        fontSize = 10.sp,
+                        color = severity.color.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = when (severity) {
+                            SeverityLevel.LOW -> "< 5 votos"
+                            SeverityLevel.MEDIUM -> "5–14 votos"
+                            SeverityLevel.HIGH -> "≥ 15 votos"
+                        },
+                        fontSize = 10.sp,
+                        color = severity.color.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }

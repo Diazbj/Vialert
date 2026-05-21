@@ -200,10 +200,11 @@ fun UserProfileContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Reputation Progress
+            val isMaxLevel = level == UserLevel.HEROE_COMUNITARIO
             ReputationCard(
-                current = user?.score ?: 0, 
-                max = level.maxPoints, 
-                nextLevel = UserLevel.entries.getOrNull(level.ordinal + 1)?.displayName ?: stringResource(R.string.profile_reputation_max),
+                current = user?.score ?: 0,
+                max = if (isMaxLevel) user?.score ?: 0 else level.maxPoints,
+                nextLevel = if (isMaxLevel) stringResource(R.string.profile_reputation_max) else (UserLevel.entries.getOrNull(level.ordinal + 1)?.displayName ?: stringResource(R.string.profile_reputation_max)),
                 progress = progress
             )
 

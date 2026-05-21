@@ -31,7 +31,8 @@ data class StatusCounts(
 data class ModerationUiState(
     val filteredReports: List<ReportWithOwner> = emptyList(),
     val selectedFilter: ReportStatus? = null,
-    val counts: StatusCounts = StatusCounts()
+    val counts: StatusCounts = StatusCounts(),
+    val rejectDialogReportId: String? = null
 )
 
 data class ReportWithOwner(
@@ -164,15 +165,24 @@ class AdminReportModerationViewModel @Inject constructor(
         }
     }
 
-    fun rejectReport(reportId: String) {
+    fun showRejectDialog(reportId: String) {
+        _uiState.update { it.copy(rejectDialogReportId = reportId) }
+    }
+
+    fun dismissRejectDialog() {
+        _uiState.update { it.copy(rejectDialogReportId = null) }
+    }
+
+    fun rejectReport(reportId: String, reason: String) {
         val report = reportRepository.getById(reportId) ?: return
+        dismissRejectDialog()
         viewModelScope.launch {
-            reportRepository.update(report.copy(status = ReportStatus.DELETED))
+            reportRepository.update(report.copy(status = ReportStatus.DELETED, rejectionReason = reason.trim()))
             notificationRepository.create(
                 Notification(
                     tipo = TipoNotificacion.REPORTE_CERRADO,
                     titulo = "Reporte rechazado",
-                    mensaje = "Tu reporte \"${report.title}\" fue rechazado por no cumplir los criterios de la plataforma.",
+                    mensaje = "Tu reporte \"${report.title}\" fue rechazado. Motivo: ${reason.trim().ifBlank { "No cumple los criterios de la plataforma." }}",
                     reporteId = report.id,
                     destinatarioId = report.ownerId,
                     creadoEn = System.currentTimeMillis(),

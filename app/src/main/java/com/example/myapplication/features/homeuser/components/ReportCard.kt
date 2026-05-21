@@ -1,5 +1,6 @@
 package com.example.myapplication.features.homeuser.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +26,7 @@ import com.example.myapplication.R
 import com.example.myapplication.core.components.StatusCategoryChip
 import com.example.myapplication.domain.model.Report
 import com.example.myapplication.domain.model.ReportCategory
+import com.example.myapplication.domain.model.SeverityLevel
 
 @Composable
 fun ReportCard(
@@ -42,13 +45,14 @@ fun ReportCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
+            val severity = SeverityLevel.fromVotes(report.important)
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -59,6 +63,21 @@ fun ReportCard(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+                // Badge de severidad sobre la imagen
+                Surface(
+                    shape = RoundedCornerShape(bottomEnd = 0.dp, topStart = 0.dp, topEnd = 0.dp, bottomStart = 12.dp),
+                    color = severity.bgColor.copy(alpha = 0.92f),
+                    border = BorderStroke(1.dp, severity.color.copy(alpha = 0.4f)),
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = "${severity.emoji} ${severity.label}",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = severity.color,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -73,7 +92,7 @@ fun ReportCard(
                     text = categoryEnum?.displayName ?: report.type,
                     baseColor = categoryEnum?.color ?: Color.Gray
                 )
-                
+
                 StatusCategoryChip(
                     text = report.status.displayName,
                     baseColor = report.status.color

@@ -46,6 +46,48 @@ fun AdminReportModerationScreen(
     val uiState by viewModel.uiState.collectAsState()
     val aiAnalyses by viewModel.aiAnalyses.collectAsState()
 
+    // Diálogo de motivo de rechazo
+    val rejectReportId = uiState.rejectDialogReportId
+    if (rejectReportId != null) {
+        var reason by remember(rejectReportId) { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissRejectDialog() },
+            title = { Text("Rechazar reporte", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Escribe el motivo del rechazo. El usuario recibirá esta explicación.", fontSize = 13.sp, color = Color(0xFF64748B))
+                    OutlinedTextField(
+                        value = reason,
+                        onValueChange = { reason = it },
+                        label = { Text("Motivo del rechazo") },
+                        placeholder = { Text("Ej: Información insuficiente, imagen no corresponde...") },
+                        minLines = 3,
+                        maxLines = 5,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFEF4444),
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.rejectReport(rejectReportId, reason) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                ) {
+                    Text("Rechazar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissRejectDialog() }) {
+                    Text("Cancelar", color = Color(0xFF64748B))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -161,7 +203,7 @@ fun AdminReportModerationScreen(
                             aiAnalysis = aiAnalysis,
                             onVerify = { viewModel.verifyReport(reportWithOwner.report.id) },
                             onResolve = { viewModel.resolveReport(reportWithOwner.report.id) },
-                            onReject = { viewModel.rejectReport(reportWithOwner.report.id) },
+                            onReject = { viewModel.showRejectDialog(reportWithOwner.report.id) },
                             onReanalyze = { viewModel.analyzeReport(reportWithOwner.report) }
                         )
                     }
@@ -425,6 +467,24 @@ private fun ModerationReportCard(
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Icon(Icons.Default.TaskAlt, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(18.dp))
                                     Text("Reporte resuelto satisfactoriamente", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF10B981))
+                                }
+                            }
+                        }
+                    }
+                    ReportStatus.DELETED -> {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFEE2E2),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.Cancel, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+                                    Text("Reporte rechazado", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFEF4444))
+                                }
+                                if (report.rejectionReason.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("Motivo: ${report.rejectionReason}", fontSize = 11.sp, color = Color(0xFF94A3B8), lineHeight = 15.sp)
                                 }
                             }
                         }

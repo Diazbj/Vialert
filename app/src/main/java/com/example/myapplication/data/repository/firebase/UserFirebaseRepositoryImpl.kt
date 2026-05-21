@@ -157,4 +157,9 @@ class UserFirebaseRepositoryImpl @Inject constructor(
     }
 
     override fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    override suspend fun deleteAccount(userId: String) {
+        collection.document(userId).delete().await()
+        auth.currentUser?.delete()?.await()
+    }
 }

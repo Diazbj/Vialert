@@ -1,0 +1,441 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+\geometry{margin=2.5cm}
+
+% Colores institucionales
+\definecolor{primary}{RGB}{106, 27, 154}
+\definecolor{secondary}{RGB}{243, 232, 255}
+\definecolor{codebg}{RGB}{245, 245, 245}
+\definecolor{linkcolor}{RGB}{106, 27, 154}
+
+% Hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    urlcolor=linkcolor,
+    citecolor=primary
+}
+
+% Estilo de código
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{primary!30},
+    keywordstyle=\color{primary}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=5pt,
+    tabsize=4
+}
+
+% Encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{primary}{\textbf{Vialert}}}
+\fancyhead[R]{\textcolor{gray}{\small Proyecto Final --- Fase 3}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{primary}\leaders\hrule height \headrulewidth\hfill}}
+
+% Títulos de sección
+\titleformat{\section}{\large\bfseries\color{primary}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{primary!80}}{}{0em}{}
+
+% ─────────────────────────────────────────────
+\begin{document}
+
+% ── PORTADA ──────────────────────────────────
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\huge\bfseries\color{primary} Vialert\par}
+    \vspace{0.4cm}
+    {\large\color{gray} Aplicación Ciudadana de Reportes Viales\par}
+    \vspace{1.5cm}
+    \rule{\textwidth}{1.5pt}\par
+    \vspace{0.3cm}
+    {\LARGE\bfseries Entrega Final --- Fase 3\par}
+    \vspace{0.3cm}
+    \rule{\textwidth}{1.5pt}\par
+    \vspace{1.5cm}
+    {\large\textbf{Temática 1: Reportes ciudadanos}\par}
+    \vspace{0.5cm}
+    {\large Universidad del Quindío\par}
+    {\large Ingeniería de Software / Desarrollo Móvil\par}
+    \vspace{1.5cm}
+    {\large\textbf{Autor:} Jordy Díaz\par}
+    \vspace{0.3cm}
+    {\large\textbf{Correo:} JFDIAZB@uqvirtual.edu.co\par}
+    \vfill
+    {\large Mayo 2026\par}
+\end{titlepage}
+
+% ── TABLA DE CONTENIDOS ───────────────────────
+\tableofcontents
+\newpage
+
+% ════════════════════════════════════════════
+\section{Repositorio del Proyecto}
+% ════════════════════════════════════════════
+
+El código fuente completo de la aplicación Vialert se encuentra disponible en el siguiente repositorio de GitHub:
+
+\begin{center}
+    \colorbox{secondary}{\parbox{0.85\textwidth}{\centering\vspace{6pt}
+        \url{https://github.com/JordyDiazB/Vialert}
+    \vspace{6pt}}}
+\end{center}
+
+El repositorio contiene el proyecto Android completo desarrollado con Kotlin y Jetpack Compose, incluyendo todas las integraciones de servicios en la nube descritas en este documento.
+
+% ════════════════════════════════════════════
+\section{Descripción General de la Aplicación}
+% ════════════════════════════════════════════
+
+\textbf{Vialert} es una aplicación móvil Android orientada a la participación ciudadana en Colombia, específicamente diseñada para reportar y gestionar problemas de infraestructura vial, alumbrado público y seguridad vial. La plataforma conecta a ciudadanos con moderadores administrativos mediante un flujo completo de reporte, moderación y resolución.
+
+\subsection{Características principales}
+\begin{itemize}[leftmargin=1.5em]
+    \item Registro e inicio de sesión con Firebase Authentication
+    \item Creación de reportes geolocalizados con foto, categoría y descripción
+    \item Feed de reportes con filtro por distancia usando GPS real
+    \item Mapa interactivo de reportes (Mapbox)
+    \item Sistema de moderación con análisis automático por Inteligencia Artificial
+    \item Asistente virtual conversacional integrado
+    \item Sistema de reputación ciudadana con 4 niveles
+    \item Notificaciones push al verificar o rechazar un reporte
+    \item Panel de administración con estadísticas y moderación
+\end{itemize}
+
+% ════════════════════════════════════════════
+\section{Persistencia de Datos: Firebase Firestore con Caché}
+% ════════════════════════════════════════════
+
+\subsection{Implementación de Firestore}
+
+La aplicación utiliza \textbf{Firebase Cloud Firestore} como base de datos principal en tiempo real. Los datos se organizan en las colecciones \texttt{users} y \texttt{reports}, con listeners en tiempo real que actualizan la UI automáticamente mediante \texttt{StateFlow}.
+
+\subsection{Caché offline persistente}
+
+Se habilitó la persistencia offline de Firestore mediante \texttt{PersistentCacheSettings}, lo que permite que la aplicación funcione con datos previamente descargados cuando no hay conexión a internet:
+
+\begin{lstlisting}[language=Kotlin, caption={Configuración de caché persistente en FirebaseModule.kt}]
+val cacheSettings = PersistentCacheSettings.newBuilder()
+    .setSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+    .build()
+val settings = FirebaseFirestoreSettings.Builder()
+    .setLocalCacheSettings(cacheSettings)
+    .build()
+FirebaseFirestore.getInstance().apply { firestoreSettings = settings }
+\end{lstlisting}
+
+Con esta configuración, Firestore almacena localmente en el dispositivo todos los documentos consultados, permitiendo lecturas sin conexión y sincronización automática al recuperar la conectividad.
+
+% ════════════════════════════════════════════
+\section{Autenticación con Firebase}
+% ════════════════════════════════════════════
+
+La autenticación de usuarios se gestiona completamente con \textbf{Firebase Authentication}, implementando:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Registro} de nuevos usuarios con correo electrónico y contraseña
+    \item \textbf{Inicio de sesión} con validación de credenciales
+    \item \textbf{Recuperación de contraseña} mediante envío de correo de restablecimiento
+    \item \textbf{Eliminación de cuenta} (baja del usuario desde Firebase Auth y Firestore simultáneamente)
+    \item \textbf{Roles de usuario}: ciudadano y administrador, gestionados en Firestore
+\end{itemize}
+
+\subsection{Recuperación de contraseña}
+
+La funcionalidad de recuperación envía un correo oficial de Firebase al usuario con un enlace para restablecer su contraseña:
+
+\begin{lstlisting}[language=Kotlin, caption={Envío de correo de recuperación}]
+override suspend fun sendPasswordReset(email: String) {
+    auth.sendPasswordResetEmail(email).await()
+}
+\end{lstlisting}
+
+El flujo completo incluye una pantalla dedicada (\texttt{ForgetPasswordScreen}) con validación del correo y mensajes de confirmación al usuario.
+
+% ════════════════════════════════════════════
+\section{Funcionalidad de Mapas: Mapbox}
+% ════════════════════════════════════════════
+
+La aplicación integra el \textbf{SDK de Mapbox Maps v11} para Android en dos contextos:
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Exploración de reportes}: pantalla de mapa interactivo con marcadores de todos los reportes activos, agrupados por categoría y con indicadores de severidad.
+    \item \textbf{Creación de reportes}: selector de ubicación que permite al usuario tocar el mapa para establecer las coordenadas exactas del problema reportado.
+\end{enumerate}
+
+\subsection{Filtro por distancia con GPS}
+
+El feed de reportes incluye filtros de proximidad que usan la ubicación real del dispositivo mediante \texttt{FusedLocationProviderClient} y la fórmula de Haversine para calcular la distancia entre coordenadas:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Todos}: sin filtro de distancia
+    \item \textbf{Cercanos}: reportes en radio de 5 km
+    \item \textbf{En la ciudad}: reportes en radio de 30 km
+\end{itemize}
+
+% ════════════════════════════════════════════
+\section{Almacenamiento de Imágenes en la Nube: Cloudinary}
+% ════════════════════════════════════════════
+
+\subsection{Servicio utilizado}
+
+Se utilizó \textbf{Cloudinary} como servicio de almacenamiento y entrega de imágenes en la nube. Cloudinary es una plataforma especializada en gestión de activos multimedia con CDN global, transformaciones automáticas y URLs de acceso seguro (HTTPS).
+
+\subsection{Implementación}
+
+Las imágenes se suben directamente desde el dispositivo al endpoint de Cloudinary mediante una petición HTTP multipart, utilizando un \textit{upload preset} sin firma (\textit{unsigned upload}):
+
+\begin{lstlisting}[language=Kotlin, caption={Subida de imágenes a Cloudinary (ImageUploadService.kt)}]
+private val cloudName = "dupm8asvi"
+private val uploadPreset = "vialert_preset"
+
+suspend fun uploadImage(uri: Uri, context: Context, folder: String): String {
+    val url = "https://api.cloudinary.com/v1_1/$cloudName/image/upload"
+    // Multipart/form-data con file, upload_preset y folder
+    // Retorna la secure_url del CDN
+}
+\end{lstlisting}
+
+\subsection{Uso en la aplicación}
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Reportes}: las fotos adjuntadas al crear un reporte se suben a la carpeta \texttt{reports/} y la URL se guarda en Firestore.
+    \item \textbf{Perfil de usuario}: la foto de perfil se sube a la carpeta \texttt{profiles/} al editar el perfil.
+\end{itemize}
+
+Las imágenes se muestran en la app usando la librería \textbf{Coil} con carga asíncrona y caché local.
+
+% ════════════════════════════════════════════
+\section{Implementación de Inteligencia Artificial}
+% ════════════════════════════════════════════
+
+\subsection{Descripción funcional}
+
+La inteligencia artificial se integra en dos funcionalidades principales:
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Moderación automática de reportes}: el sistema analiza cada reporte ciudadano y genera una recomendación (VERIFICAR / RECHAZAR) con nivel de confianza, puntos clave y justificación. Esto asiste al administrador en la toma de decisiones.
+    \item \textbf{Asistente virtual conversacional}: un chatbot integrado en la pantalla principal que responde preguntas de los ciudadanos sobre el uso de la app, categorías de reportes, seguridad vial e infraestructura.
+\end{enumerate}
+
+\subsection{Servicio de IA utilizado}
+
+Se integró la API de \textbf{OpenRouter} (\url{https://openrouter.ai}), que ofrece acceso unificado a múltiples modelos de lenguaje grande (LLMs) a través de una interfaz compatible con OpenAI. OpenRouter permite utilizar modelos gratuitos de proveedores como Meta, Google y NVIDIA sin costo por token.
+
+\textbf{Modelos utilizados} (en orden de preferencia con fallback automático):
+\begin{itemize}[leftmargin=1.5em]
+    \item \texttt{meta-llama/llama-3.3-70b-instruct:free} (principal)
+    \item \texttt{google/gemma-4-26b-a4b-it:free} (secundario)
+    \item \texttt{meta-llama/llama-3.2-3b-instruct:free} (fallback)
+\end{itemize}
+
+\subsection{Diagrama de integración}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=1.4cm and 2.2cm,
+    box/.style={rectangle, rounded corners=6pt, draw=primary, fill=secondary,
+                minimum width=2.8cm, minimum height=1cm, text centered, font=\small},
+    cloud/.style={ellipse, draw=primary!60, fill=primary!10,
+                  minimum width=3cm, minimum height=1cm, text centered, font=\small},
+    arr/.style={-{Stealth[length=6pt]}, thick, color=primary!70}
+]
+
+\node[box] (vm)       {Admin / User\\ViewModel};
+\node[box, right=of vm] (svc) {GeminiAiService\\(Singleton)};
+\node[cloud, right=of svc] (or) {OpenRouter\\API};
+\node[box, below=of or] (model) {LLM\\(Llama / Gemma)};
+\node[box, below=of svc] (fb) {Firestore\\(resultado)};
+
+\draw[arr] (vm) -- node[above,font=\tiny]{analyzeReport()} (svc);
+\draw[arr] (svc) -- node[above,font=\tiny]{HTTP POST} (or);
+\draw[arr] (or) -- node[right,font=\tiny]{routing} (model);
+\draw[arr] (model) -- node[right,font=\tiny]{JSON} (or);
+\draw[arr] (or) -- node[above,font=\tiny]{respuesta} (svc);
+\draw[arr] (svc) -- node[right,font=\tiny]{AiReportAnalysis} (fb);
+\draw[arr] (fb) -- node[below,font=\tiny]{UI update} (vm);
+
+\end{tikzpicture}
+\end{center}
+
+\subsection{Implementación técnica}
+
+La comunicación con OpenRouter se realiza mediante \texttt{java.net.HttpURLConnection}, sin dependencias externas adicionales. La clase \texttt{GeminiAiService} gestiona:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Fallback multi-modelo}: si un modelo retorna error 429 (rate limit) o 404, el sistema espera el tiempo indicado por el servidor y pasa automáticamente al siguiente modelo de la lista.
+    \item \textbf{Análisis heurístico local}: si todos los modelos fallan, se aplica un análisis basado en reglas locales (longitud del texto, coherencia léxica, categoría) para no bloquear al administrador.
+    \item \textbf{Parser JSON robusto}: extracción del objeto JSON mediante balance de llaves, resistente a respuestas malformadas del modelo.
+\end{itemize}
+
+\begin{lstlisting}[language=Kotlin, caption={Prompt de moderación enviado al LLM}]
+// Sistema:
+"Eres un moderador estricto de reportes ciudadanos. Responde ÚNICAMENTE con JSON."
+
+// Usuario:
+"""
+Título: "${report.title}"
+Categoría: ${report.type}
+Descripción: "${report.description}"
+
+CAUSAS DE RECHAZO (basta con UNA):
+- Texto sin sentido, aleatorio o incomprensible
+- Descripción vacía o demasiado corta
+- No relacionado con vías, infraestructura o seguridad vial
+- Contenido ofensivo o spam
+
+Responde con: {"recommendation":"VERIFICAR"|"RECHAZAR",
+               "confidence":"Alta"|"Media"|"Baja",
+               "keyPoints":[...], "reasoning":"..."}
+"""
+\end{lstlisting}
+
+\subsection{Claves API}
+
+Las claves de API se almacenan en \texttt{local.properties} (excluido del control de versiones) y se inyectan en tiempo de compilación mediante \texttt{BuildConfig}, garantizando que no queden expuestas en el repositorio.
+
+% ════════════════════════════════════════════
+\section{Notificaciones Push: Firebase Cloud Messaging}
+% ════════════════════════════════════════════
+
+\subsection{Descripción}
+
+Las notificaciones push se implementaron con \textbf{Firebase Cloud Messaging (FCM)}, permitiendo informar a los ciudadanos sobre cambios en el estado de sus reportes en tiempo real, sin necesidad de que la aplicación esté activa.
+
+\subsection{Flujo de notificaciones}
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item El administrador \textbf{verifica} o \textbf{rechaza} un reporte desde el panel de moderación.
+    \item El \texttt{AdminReportModerationViewModel} actualiza el estado en Firestore y llama a \texttt{sendNotificationToUser()}.
+    \item La función Cloud guarda una notificación en el documento del usuario en Firestore con el título, mensaje, tipo de acción y razón de rechazo (si aplica).
+    \item El dispositivo del ciudadano recibe la notificación a través del servicio \texttt{VialertFirebaseMessagingService}.
+\end{enumerate}
+
+\subsection{Implementación del servicio}
+
+\begin{lstlisting}[language=Kotlin, caption={VialertFirebaseMessagingService.kt}]
+class VialertFirebaseMessagingService : FirebaseMessagingService() {
+
+    override fun onMessageReceived(message: RemoteMessage) {
+        val title = message.notification?.title ?: message.data["title"] ?: "Vialert"
+        val body  = message.notification?.body  ?: message.data["body"]  ?: "Nueva notificación"
+        showNotification(title, body)
+    }
+
+    private fun showNotification(title: String, body: String) {
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
+                                          NotificationManager.IMPORTANCE_HIGH)
+        notificationManager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.vialert)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+    }
+}
+\end{lstlisting}
+
+El servicio está registrado en \texttt{AndroidManifest.xml} con el filtro de intención \texttt{com.google.firebase.MESSAGING\_EVENT}.
+
+\subsection{Tipos de notificaciones}
+
+\begin{center}
+\begin{tabularx}{0.9\textwidth}{lX}
+\toprule
+\textbf{Evento} & \textbf{Mensaje enviado al ciudadano} \\
+\midrule
+Reporte verificado & ``Tu reporte \textit{[título]} ha sido verificado. Gracias por contribuir.'' \\
+Reporte rechazado & ``Tu reporte \textit{[título]} fue rechazado. Razón: \textit{[motivo]}.'' \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ════════════════════════════════════════════
+\section{Distribución: Firebase App Distribution}
+% ════════════════════════════════════════════
+
+El APK de prueba se publica y distribuye utilizando \textbf{Firebase App Distribution}, accesible desde la consola de Firebase en \url{https://console.firebase.google.com}. Esta herramienta permite distribuir versiones de prueba a evaluadores sin necesidad de publicar en Google Play Store.
+
+\textbf{Pasos realizados para la distribución}:
+\begin{enumerate}[leftmargin=1.5em]
+    \item Generación del APK de release desde Android Studio: \textit{Build → Generate Signed APK}.
+    \item Acceso a la sección \textit{App Distribution} en la consola de Firebase del proyecto \textbf{Vialert}.
+    \item Carga del APK y configuración de la lista de evaluadores (correos institucionales).
+    \item Envío de invitaciones de instalación a los evaluadores.
+\end{enumerate}
+
+% ════════════════════════════════════════════
+\section{Resumen de Requerimientos Implementados}
+% ════════════════════════════════════════════
+
+\begin{center}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{\#} & \textbf{Requerimiento} & \textbf{Estado} \\
+\midrule
+1 & Persistencia con Firebase Firestore + caché offline & \textcolor{green!60!black}{✓ Cumplido} \\
+2 & Autenticación con Firebase Auth & \textcolor{green!60!black}{✓ Cumplido} \\
+3 & Recuperación de contraseña con Firebase & \textcolor{green!60!black}{✓ Cumplido} \\
+4 & Funcionalidad de mapas (Mapbox Maps SDK v11) & \textcolor{green!60!black}{✓ Cumplido} \\
+5 & Carga de imágenes en la nube (Cloudinary) & \textcolor{green!60!black}{✓ Cumplido} \\
+6 & Integración de IA (OpenRouter + LLMs gratuitos) & \textcolor{green!60!black}{✓ Cumplido} \\
+7 & Notificaciones push (Firebase Cloud Messaging) & \textcolor{green!60!black}{✓ Cumplido} \\
+8 & Distribución APK (Firebase App Distribution) & \textcolor{green!60!black}{✓ Cumplido} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ════════════════════════════════════════════
+\section{Evidencias Visuales}
+% ════════════════════════════════════════════
+
+Las evidencias visuales del funcionamiento de las principales características de la aplicación se presentan en el video adjunto a esta entrega. El video incluye demostración de:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item Registro e inicio de sesión con Firebase Auth
+    \item Recuperación de contraseña
+    \item Creación de reporte con selección de ubicación en Mapbox y carga de foto a Cloudinary
+    \item Feed de reportes con filtro por distancia GPS
+    \item Mapa interactivo de reportes (pantalla Explorar)
+    \item Análisis automático de reportes con IA (moderación)
+    \item Asistente virtual conversacional
+    \item Notificación push al verificar / rechazar un reporte
+    \item Sistema de niveles de reputación ciudadana
+    \item Panel de administración con estadísticas
+\end{itemize}
+
+\vfill
+\begin{center}
+    \textcolor{gray}{\small Documento generado para la entrega final de Proyecto de Desarrollo Móvil --- Universidad del Quindío --- Mayo 2026}
+\end{center}
+
+\end{document}

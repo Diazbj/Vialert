@@ -56,6 +56,7 @@ fun EditProfileScreen(
     var phone by remember { mutableStateOf(user.phone) }
     var bio by remember { mutableStateOf(user.bio) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val isUploadingPhoto by remember { derivedStateOf { uiState.isUploadingPhoto } }
 
@@ -269,8 +270,52 @@ fun EditProfileScreen(
                 Text(stringResource(R.string.edit_profile_btn_save), fontWeight = FontWeight.Bold)
             }
             
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = { showDeleteDialog = true },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, Color(0xFFEF4444)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFEF4444))
+            ) {
+                Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Eliminar cuenta", fontWeight = FontWeight.Bold)
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Eliminar cuenta", fontWeight = FontWeight.Bold, color = Color(0xFFEF4444)) },
+            text = {
+                Text(
+                    "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible y se perderán todos tus datos.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        viewModel.deleteAccount()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                ) {
+                    Text("Sí, eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar", color = Color(0xFF64748B))
+                }
+            }
+        )
     }
 
     if (showPasswordDialog) {

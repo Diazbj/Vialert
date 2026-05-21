@@ -3,7 +3,7 @@ package com.example.myapplication.features.assistant
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.service.GeminiAiService
-import com.google.ai.client.generativeai.Chat
+import com.example.myapplication.data.service.OpenRouterChat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +33,7 @@ class VirtualAssistantViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private var chat: Chat = geminiAiService.createAssistantChat()
+    private var chat: OpenRouterChat = geminiAiService.createAssistantChat()
 
     fun onInputChanged(text: String) {
         _inputText.update { text }

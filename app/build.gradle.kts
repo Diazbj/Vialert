@@ -28,6 +28,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${localProps.getProperty("MAPBOX_ACCESS_TOKEN", "")}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${localProps.getProperty("GEMINI_API_KEY", "")}\"")
+        buildConfigField("String", "OPENROUTER_API_KEY", "\"${localProps.getProperty("OPENROUTER_API_KEY", "")}\"")
+        buildConfigField("String", "OPENROUTER_ASSISTANT_KEY", "\"${localProps.getProperty("OPENROUTER_ASSISTANT_KEY", "")}\"")
     }
 
     buildTypes {

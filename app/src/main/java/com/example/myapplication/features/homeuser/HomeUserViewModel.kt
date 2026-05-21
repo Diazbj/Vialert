@@ -16,6 +16,13 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.*
+
+enum class LocationFilter(val label: String, val radiusKm: Double?) {
+    ALL("Todos", null),
+    NEARBY("Cercanos", 5.0),
+    CITY("En la ciudad", 30.0)
+}
 
 @HiltViewModel
 class HomeUserViewModel @Inject constructor(
@@ -42,15 +49,33 @@ class HomeUserViewModel @Inject constructor(
     private fun observeReports() {
         viewModelScope.launch {
             reportRepository.reports.collect { allReports ->
-                val activeReports = allReports.filter { it.status != ReportStatus.DELETED }
+                val active = allReports.filter { it.status != ReportStatus.DELETED }
                 _uiState.update { state ->
-                    state.copy(
-                        reports = activeReports,
-                        reportTimes = generateTimes(activeReports)
-                    )
+                    val filtered = applyLocationFilter(active, state.locationFilter, state.userLat, state.userLng)
+                    state.copy(reports = filtered, reportTimes = generateTimes(filtered))
                 }
             }
         }
+    }
+
+    fun setLocationFilter(filter: LocationFilter, userLat: Double?, userLng: Double?) {
+        val allActive = reportRepository.reports.value.filter { it.status != ReportStatus.DELETED }
+        val filtered = applyLocationFilter(allActive, filter, userLat, userLng)
+        _uiState.update { it.copy(locationFilter = filter, userLat = userLat, userLng = userLng, reports = filtered, reportTimes = generateTimes(filtered)) }
+    }
+
+    private fun applyLocationFilter(reports: List<Report>, filter: LocationFilter, userLat: Double?, userLng: Double?): List<Report> {
+        val radius = filter.radiusKm ?: return reports
+        if (userLat == null || userLng == null) return reports
+        return reports.filter { haversineKm(userLat, userLng, it.location.latitude, it.location.longitude) <= radius }
+    }
+
+    private fun haversineKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
+        return R * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
 
     private fun startTimer() {
@@ -90,5 +115,8 @@ class HomeUserViewModel @Inject constructor(
 data class HomeUserUiState(
     val currentUserId: String = "",
     val reports: List<Report> = emptyList(),
-    val reportTimes: Map<String, String> = emptyMap()
+    val reportTimes: Map<String, String> = emptyMap(),
+    val locationFilter: LocationFilter = LocationFilter.ALL,
+    val userLat: Double? = null,
+    val userLng: Double? = null
 )

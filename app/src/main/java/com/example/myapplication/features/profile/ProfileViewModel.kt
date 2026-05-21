@@ -30,7 +30,7 @@ data class ProfileStats(
 
 data class ProfileUiState(
     val user: User? = null,
-    val userLevel: UserLevel = UserLevel.NIVEL_1,
+    val userLevel: UserLevel = UserLevel.NOVATO,
     val stats: ProfileStats = ProfileStats(),
     val pointsProgress: Float = 0f,
     val myReports: List<Report> = emptyList(),
@@ -77,9 +77,13 @@ class ProfileViewModel @Inject constructor(
                 val allReports = data.allReports
                 if (user != null) {
                     val level = UserLevel.fromScore(user.score)
-                    val pointsInLevel = user.score - level.minPoints
-                    val range = level.maxPoints - level.minPoints
-                    val progress = if (range > 0) pointsInLevel.toFloat() / range else 0f
+                    val progress = if (level == UserLevel.HEROE_COMUNITARIO) {
+                        1f
+                    } else {
+                        val pointsInLevel = user.score - level.minPoints
+                        val range = level.maxPoints - level.minPoints
+                        if (range > 0) pointsInLevel.toFloat() / range else 0f
+                    }
 
                     _uiState.update { state ->
                         state.copy(
@@ -115,6 +119,14 @@ class ProfileViewModel @Inject constructor(
 
     fun onLogout() {
         viewModelScope.launch {
+            sessionDataStore.clearSession()
+        }
+    }
+
+    fun deleteAccount() {
+        val userId = _uiState.value.user?.id ?: return
+        viewModelScope.launch {
+            userRepository.deleteAccount(userId)
             sessionDataStore.clearSession()
         }
     }
